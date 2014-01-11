@@ -1,0 +1,9 @@
+% Stack add {
+	return addLast(_self, element);
+}
+
+% Stack take {
+	return takeLast(_self);
+}
+
+%init

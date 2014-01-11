@@ -1,0 +1,49 @@
+// differences from c.rep:
+//	`metaroot_ctor() does not call super_ctor() -- no need to, we hope
+//	first arguments to ctor are copied to struct in order of declaration
+//	then argumentlist is shared with other `meta_ctor()s
+//	memcpy() performs binary inheritance
+//	there is no way to generate `root and `metaroot descriptions and init()
+//
+// note that 'ctor' and its calling convention are burnt into this file
+//
+% init			// implement %init request for root class
+
+`{dcl
+  `{if `class `root
+
+    `%selectors
+
+    static  void  *  `metaroot _ctor  (void  *  _self,  va_list  *  app)  { `n
+	`t	struct  `metaroot  *  self  =  _self; `n
+	`t	const  size_t  offset  =  offsetof(struct  `metaroot ,  ctor); `n
+	`t	typedef  void  (*  voidf)  (); `n
+	`t	voidf  selector; `n
+	`t	va_list  ap; `n `n
+
+		`{struct `metaroot
+		  `{if `name super
+		`t	self  ->  `name  =  cast( `metaroot ,  va_arg(*  app,  `type )); `n
+		  `} `{else
+		`t	self  ->  `name  =  va_arg(*  app,  `type ); `n
+		  `}fi
+		`}n
+
+	`t	memcpy((char  *)  self  +  offset,  ` \
+			(char  *)  self  ->  super  +  offset, `n
+	`t	`t	sizeOf(self  ->  super)  -  offset); `n `n
+
+	#ifdef  va_copy `n
+	`t	va_copy(ap,  *  app); `n
+	#else `n
+	`t	ap  =  *  app; `n
+	#endif `n
+	`%meta-ctor-loop
+	#ifdef  va_copy `n
+	`t	va_end(ap); `n
+	#endif `n
+	`t	return  self; `n
+    } `n `n
+
+  `}fi
+`}dcl

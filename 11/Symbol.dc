@@ -1,0 +1,84 @@
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "parse.h"		// error()
+#include "Node.h"
+
+% Symbol ctor {
+	struct Symbol * self = super_ctor(Symbol(), _self, app);
+
+	self -> name = va_arg(* app, const char *);
+	self -> lex = va_arg(* app, int);
+	return self;
+}
+
+% Symbol name {
+%casts
+	return self -> name;
+}
+
+% Symbol lex {
+%casts
+	return self -> lex;
+}
+
+% : Reserved delete {		// don't respondTo delete
+}
+
+% Var value {
+%casts
+	return self -> value;
+}
+
+% Var setvalue {
+%casts
+	return self -> value = value;
+}
+
+% Const ctor {
+	struct Const * self = super_ctor(Const(), _self, app);
+
+	setvalue(self, va_arg(* app, double));
+	return self;
+}
+
+% : Const delete {		// don't respondTo delete
+}
+
+% Fun setfun {
+%casts
+	if (self -> fun)
+		delete(self -> fun);
+	self -> fun = fun;
+}
+
+% Fun funvalue {
+%casts
+	if (! self -> fun)
+		error("undefined function");
+	setvalue(self, value);	// argument for parameter
+	return exec(self -> fun);
+}
+
+% Math ctor {
+	struct Math * self = super_ctor(Math(), _self, app);
+
+	self -> fun = va_arg(* app, function);
+	return self;
+}
+
+% : Math delete {		// don't respondTo delete
+}
+
+% Math mathvalue {
+	double result;
+%casts
+	errno = 0;
+	result = self -> fun(value);
+	if (errno)
+		error("error in %s: %s", name(self), strerror(errno));
+	return result;
+}
+
+%init

@@ -1,0 +1,44 @@
+.\"	munch.1 -- 1.3 Sep 26 16:50:35 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH munch 1 "local: ats"
+.SH NAME
+munch \(em produce class list
+.SH SYNOPSIS
+.B nm \(mip
+object... archive...
+.B | munch
+.SH DESCRIPTION
+.I munch
+reads a Berkeley-style
+.IR nm (1)
+listing from standard input and produces as standard output
+a C source file
+defining a null-terminated array
+.B classes[]
+with pointers to the class functions found in each
+.I object
+and
+.IR archive .
+The array is sorted by class function names.
+.PP
+A class function
+is any name that appears with type
+.B T
+and, preceded with an underscore, with type
+.BR b ,
+.BR d ,
+or
+.BR s .
+.SH BUGS
+This is a hack to simplify retrieval programs.
+The compatible effect of option
+.B \(mip
+in Berkeley and System V
+.I nm
+is quite a surprise.
+.PP
+Because \s-1HP/UX\s0
+.I nm
+does not output static symbols,
+.I munch
+is not very useful on this system.

@@ -1,0 +1,41 @@
+#include "List.h"
+
+static void * stack;
+
+% Exception ctor {
+	void * self = super_ctor(Exception(), _self, app);
+
+	if (! stack)
+		stack = new(List(), 10);
+	addLast(stack, self);
+	return self;
+}
+
+% Exception dtor {
+	void * top;
+%casts
+	assert(stack);
+	top = takeLast(stack);
+	assert(top == self);
+	return super_dtor(Exception(), self);
+}
+
+% catchException {
+%casts
+	self -> armed = 1;
+	return self -> label;
+}
+
+void cause (int number) {
+	unsigned cnt;
+
+	if (number && stack && (cnt = count(stack)))
+	{	void * top = lookAt(stack, cnt-1);
+		struct Exception * e = cast(Exception(), top);
+
+		if (e -> armed)
+			longjmp(e -> label, number);
+	}
+}
+
+%init

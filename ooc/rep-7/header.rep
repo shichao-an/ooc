@@ -1,0 +1,3 @@
+% header		// header for method
+
+`result  `method  ( `{() `const `type  `_ `name `}, `,... )

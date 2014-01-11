@@ -1,0 +1,55 @@
+! xbutton: this resource places the button to the left of the display
+
+*form.button.fromHoriz:	lineOut
+
+! xrun uses a form -- order must match creation
+
+*form.C.fromHoriz:		lineOut
+*form.1.fromVert:		lineOut
+*form.2.fromVert:		lineOut
+*form.3.fromVert:		lineOut
+*form.a.fromVert:		C
+*form.2.fromHoriz:		1
+*form.3.fromHoriz:		2
+*form.a.fromHoriz:		3
+*form.4.fromVert:		1
+*form.5.fromVert:		2
+*form.6.fromVert:		3
+*form.s.fromVert:		a
+*form.5.fromHoriz:		4
+*form.6.fromHoriz:		5
+*form.s.fromHoriz:		6
+*form.7.fromVert:		4
+*form.8.fromVert:		5
+*form.9.fromVert:		6
+*form.m.fromVert:		s
+*form.8.fromHoriz:		7
+*form.9.fromHoriz:		8
+*form.m.fromHoriz:		9
+*form.Q.fromVert:		7
+*form.0.fromVert:		8
+*form.t.fromVert:		9
+*form.d.fromVert:		m
+*form.0.fromHoriz:		Q
+*form.t.fromHoriz:		0
+*form.d.fromHoriz:		t
+
+! xrun uses accelerators in the form
+
+*form.C.accelerators:	<KeyPress>c:	set() notify() unset()
+*form.Q.accelerators:	<KeyPress>q:	set() notify() unset()
+*form.0.accelerators:	:<KeyPress>0:	set() notify() unset()
+*form.1.accelerators:	:<KeyPress>1:	set() notify() unset()
+*form.2.accelerators:	:<KeyPress>2:	set() notify() unset()
+*form.3.accelerators:	:<KeyPress>3:	set() notify() unset()
+*form.4.accelerators:	:<KeyPress>4:	set() notify() unset()
+*form.5.accelerators:	:<KeyPress>5:	set() notify() unset()
+*form.6.accelerators:	:<KeyPress>6:	set() notify() unset()
+*form.7.accelerators:	:<KeyPress>7:	set() notify() unset()
+*form.8.accelerators:	:<KeyPress>8:	set() notify() unset()
+*form.9.accelerators:	:<KeyPress>9:	set() notify() unset()
+*form.a.accelerators:	:<KeyPress>+:	set() notify() unset()
+*form.s.accelerators:	:<KeyPress>-:	set() notify() unset()
+*form.d.accelerators:	:<KeyPress>/:	set() notify() unset()
+*form.t.accelerators:	:<KeyPress>=:	set() notify() unset()
+*form.m.accelerators:	:<KeyPress>*:	set() notify() unset()

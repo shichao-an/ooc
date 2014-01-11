@@ -1,0 +1,121 @@
+.\"	Ic.4 -- 1.2 Sep 30 06:38:13 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Ic 4 "local: ats"
+.SH NAME
+\f3IcClass: Class  Ic: Objct\fP \(em basic input/output/transput objects
+.SH SYNOPSIS
+.nf
+Objct
+    \f3Ic\fP
+        Button
+        Calc
+        LineOut
+        Mux
+.sp .5
+.B new(Ic());
+\f3new(Button(), "\f2text\f3");\f1
+.B new(Calc());
+.B new(LineOut());
+.B new(Mux());
+.sp .5
+.B %\(mi
+.BI "void wire (Objct @ " to ", " self )
+.BI "enum { reject, accept } gate (" self ", const void * " item )
+.fi
+.SH DESCRIPTION
+An
+.B Ic
+object has an output pin and an input action.
+.B wire()
+connects the output to some other object.
+If an
+.B Ic
+object is sent a data
+.I item
+with
+.BR gate() ,
+it will perform some action and send some result to its output pin;
+some
+.B Ic
+objects only create output and others only consume input.
+.B gate()
+returns
+.B accept
+if the receiver accepts the data.
+.PP
+.B Ic
+is a base class.
+Subclasses overwrite
+.B gate()
+to implement their own processing.
+.B Ic_gate()
+takes
+.I item
+and uses
+.B gate()
+to send it on to the output pin,
+i.e.,
+a subclass will use
+.B super_gate()
+to send something to its output pin.
+.PP
+A
+.B Button
+object contains a text which is sent out in response to certain inputs.
+It expects an
+.B Event
+object as input.
+If the
+.B Event
+contains a matching text or a null pointer
+or other data, the
+.B Button
+accepts the input and sends its own text on.
+A non-matching text is rejected.
+.PP
+.B Button
+is designed as a base class.
+Subclasses should match mouse positions, etc., and use
+.B super_gate()
+to send out the appropriate text.
+.PP
+A
+.B Calc
+object receives a string,
+computes a result, and sends the current result on as a string.
+The first character of the input string is processed:
+digits are assembled into a non-negative decimal number;
+.BR + ,
+.BR \(mi ,
+.BR * ,
+and
+.B /
+perform arithmetic operations on two operands;
+.B =
+completes an arithmetic operation;
+.B C
+resets the calculator; and
+.B Q
+quits the application.
+The calculator is a simple, precedence-free, finite state machine:
+the first set of digits defines a first operand;
+the first operator is saved;
+more digits define another operand;
+if another operator is received,
+the saved operator is executed and the new operator is saved.
+Invalid inputs are accepted and silently ignored.
+.PP
+A
+.B LineOut
+object accepts a string and displays it.
+.PP
+A
+.B Mux
+object can be wired to a list of outputs.
+It sends its input to each of these outputs
+until one of them accepts the input.
+The list is built and searched in order of the
+.B wire()
+calls.
+.SH SEE ALSO
+Crt(4), Event(4), Xt(4)

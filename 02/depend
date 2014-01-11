@@ -1,0 +1,4 @@
+new.o : new.h new.r 
+String.o : String.h new.h new.r 
+Atom.o : String.h new.h new.r 
+strings.o : String.h new.h 

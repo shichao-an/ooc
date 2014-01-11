@@ -1,0 +1,107 @@
+#!/bin/sh
+##! /usr/local/gnu/bin/bash
+#	use /bin/bash on linux
+#	cannot use sh on NeXT -- it forgets to remove the temporary file
+
+#   ooc -- 5.12 12/30/13 6:54:25
+#	Copyright (c) 1993, 2013 Axel T. Schreiner
+
+usage()
+{
+	cat >&2 <<'---'
+usage:  ooc [option ...] [report ...] description target ...
+
+options:     -d         arrange for debugging
+             -l         make #line stamps
+             -Dnm=val   define val for `nm (one word)
+             -M         make dependency for each description
+             -R         process root description
+             -7 -8 ...  versions for book chapters
+report:      report.rep load alternative report file
+description: class      load class description file
+targets:     -dc        make thunks for last 'class'
+             -h         make interface for last 'class'
+             -r         make representation for last 'class'
+             -          preprocess stdin for last 'class'
+             source.dc  preprocess source for last 'class'
+---
+	exit 1
+# it does not make any difference when the reports are loaded,
+# as long as they are loaded before they are used,
+# but it seems sensible to enforce some order on the command line
+}
+
+	ooc='-f io.awk -f report.awk -f parse.awk -f main.awk'
+	debug= d='-f report.dbg -f parse.dbg'
+
+# the following need to be reviewed during installation (more below)
+
+	for awk in /usr/local/gnu/bin/gawk /usr/local/bin/gawk /usr/bin/gawk \
+	    /sw/bin/gawk ''; do
+	  [ -f $awk ] && break
+	done
+	[ "$awk" ] ||
+	  { echo >&2 GNU awk not found; exit 1; }
+
+	for home in $HOME/oop/code/ooc/ $HOME/ooc/ooc/ \
+	    $HOME/Documents/Vorlesungen/oop/code/ooc/ ''; do
+	  [ -d $home ] && break
+	done
+	[ "$home" ] ||
+	  { echo >&2 ooc files not found; exit 1; }
+
+# this loop handles global options
+
+debug= lines= define=-DGNUC=0 makefile= m= R= version=
+while case "$1"
+      in -d)		debug="$d -v debug=1"
+      ;; -l)		lines="-v lines=1"
+      ;; -D?*)		define="$define $1"
+      ;; -M)		makefile='-v makefile=1' m=m.rep
+      ;; -R)		R=-R
+      ;; -*)		[ -d $home/rep$1 ] || usage
+			version=$1
+      ;; *.rep)		break
+      ;; '' | *.*)	usage
+      ;; *)		break
+      esac
+do	shift
+done
+
+# the following need to be reviewed during installation (more above)
+# rep is the current version, rep$version are others...
+
+	# AWKPATH=$home/awk	# gawk 2.14.2 only supports this as a prefix
+	AWKPATH=$AWKPATH:$home/awk
+	OOCPATH=$OOCPATH:$home/rep$version
+	export AWKPATH OOCPATH
+
+# the following loops minimize report loading and assert correct usage
+
+argv= loadReports=yes
+while case $1
+      in *.rep)		loadReports=		# explicit report suppresses
+      ;; '' | -* | *.*)	usage			# no switches, etc, yet
+      ;; *)		break			# found description
+      esac
+do	argv="$argv $1"				# collects reports, if any
+	shift
+done
+
+dc= h= header= r= va= c= etc=
+while case $1					# now permit switches, sources
+      in -dc)		dc=dc.rep header=header.rep
+      ;; -h)		h=h$R.rep header=header.rep
+      ;; -r)		r=r$R.rep va=va.rep
+      ;; - | *.dc)	c=c$R.rep header=header.rep va=va.rep etc=etc.rep
+      ;; '')		break
+      ;; -* | *.*)	usage
+      esac
+do	argv="$argv $1"
+	shift
+done
+
+if [ "loadReports" ]
+then	loadReports="$m $dc $h $header $r $va $c $etc"
+fi
+exec $awk $ooc $debug $lines $makefile -- $define $loadReports $argv

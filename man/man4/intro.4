@@ -1,0 +1,88 @@
+.\"	intro.4 -- 1.2 Sep 30 06:26:11 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH intro 4 "local: ats"
+.SH NAME
+intro \(em introduction to the calculator application
+.SH SYNOPSIS
+.nf
+.ta 30n
+Objct	Class
+    Event
+    Ic	    IcClass
+        Button
+        Calc
+        Crt
+            CButton
+            CLineOut
+        LineOut
+        Mux
+    List	    ListClass
+    Xt
+        XawBox
+        XawCommand
+            XButton
+        XawForm
+        XawLabel
+            XLineOut
+        XtApplicationShell
+.fi
+.SH DESCRIPTION
+.BR Object (3)
+is the root class.
+.B Object
+needs to be renamed as
+.B Objct
+because the original name is used by X11.
+.PP
+.BR Event (4)
+is a class to represent input data such as key presses
+or mouse clicks.
+.PP
+.BR Ic (4)
+is the base class to represent objects that can receive,
+process, and send events.
+.B Button
+converts incoming events to events with definite text values.
+.B Calc
+processes texts and sends a result on.
+.B LineOut
+displays an incoming text.
+.B Mux
+tries to send an incoming event to one of several objects.
+.PP
+.BR Crt (4)
+is a class to work with the
+.I curses
+terminal screen function package.
+It sends position events for a cursor
+and text events for other key presses.
+.B CButton
+implements
+.B Button
+on a
+.I curses
+screen.
+.B CLineOut
+implements
+.BR LineOut .
+.PP
+.B List
+manages a list of objects and is taken from chapter 7.
+.PP
+.BR Xt (4)
+is a class to work with the X Toolkit.
+The subclasses wrap toolkit and Athena widgets.
+.B XButton
+implements a
+.B Button
+with a
+.B Command
+widget.
+.B XLineOut
+implements a
+.B LineOut
+with a
+.B Label
+widget.
+.SH SEE ALSO
+curses(3), X(1)

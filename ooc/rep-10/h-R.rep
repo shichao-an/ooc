@@ -1,0 +1,24 @@
+// differences from h.rep:
+//	there is no superclass header to be included
+//	`root and `metaroot are produced separately; both can have methods
+//
+// it does not hurt to produce `{%- for `metaroot -- empty
+//
+% -h			// implement -h option for root class
+
+#  ifndef  `class _h `n
+#  define  `class _h `n `n
+
+`{pub
+  `{if `class `
+    `line `n
+  `} `{else `n
+    extern  const  void  *  `%const `class  (void); `n `n
+
+    `{% `%header ; `n `}n
+    `{%- `%header ; `n `}n
+
+  `}fi
+`}n
+
+#  endif `n

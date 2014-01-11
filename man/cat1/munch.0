@@ -1,0 +1,66 @@
+
+
+
+munch(1)                                                 munch(1)
+
+
+NAME
+       munch -- produce class list
+
+SYNOPSIS
+       nm -p object... archive...  | munch
+
+DESCRIPTION
+       munch  reads  a Berkeley-style nm(1) listing from standard
+       input and produces as standard  output  a  C  source  file
+       defining  a  null-terminated array classes[] with pointers
+       to the class functions found in each object  and  archive.
+       The array is sorted by class function names.
+
+       A class function is any name that appears with type T and,
+       preceded with an underscore, with type b, d, or s.
+
+BUGS
+       This is a hack to simplify retrieval programs.   The  com-
+       patible effect of option -p in Berkeley and System V nm is
+       quite a surprise.
+
+       Because HP/UX nm does not output static symbols, munch  is
+       not very useful on this system.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          1
+
+

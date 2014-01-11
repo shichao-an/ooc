@@ -1,0 +1,107 @@
+#	parse.dbg -- 5.4 Sep 27 15:30:59 1993
+#	Copyright (c) 1993 Axel T. Schreiner
+
+# parser debugging
+
+#	dumpD (d, dv, desc)	dump description "d" dv[] by name
+#	dumpDesc(desc)		dump description by name
+#	dumpClass(class)	dump class by name
+#	dumpMethod(method)	dump method by name
+#	dumpDeclarator(index)	dump declarator by index
+
+$1 ~ /\.d/ {				# filename.d
+	sub(/\.d$/, "", $1); load($1); next
+}
+
+$1 != "" && ($1, 0) in Dcl {		# description name
+	dumpDesc($1)
+}
+
+$1 != "" && ($1, 0) in Class {		# class name
+	dumpClass($1)
+}
+
+$1 != "" && $1 in Method {		# methodname
+	dumpMethod($1)
+}
+
+$1 == "all" || $1 == "descriptions" {	# all | descriptions
+	for (i in Dcl)
+		if (sub(SUBSEP "0", "", i) == 1 && i != "")
+			dumpDesc(i)
+}
+
+$1 == "all" || $1 == "classes" {	# all | classes
+	for (i in Class)
+		if (sub(SUBSEP "0", "", i) == 1 && i != "")
+			dumpClass(i)
+}
+
+END {
+	exit status
+}
+
+function dumpD (d, dv, desc,    i) {
+	printf "// %s[%s, 1..%d]:\n", d, desc, dv[desc, 0]
+	for (i = 1; i <= dv[desc, 0]; ++ i)
+		print dv[desc, i]
+}
+
+function dumpDesc (desc) {
+	dumpD("Pub", Pub, desc)
+	dumpD("Prot", Prot, desc)
+	dumpD("Dcl", Dcl, desc)
+}
+
+function dumpClass (class,    i, s, n) {
+	if (lines)
+		printf "# line %d \"%s\"\n", Fnr[class], Filename[class]
+	printf "%% %s %s:%s {\n", Meta[class], class, Super[class]
+	printf "// Struct[%s, 1..%d]:\n", class, Struct[class, 0]
+	for (i = 1; i <= Struct[class, 0]; ++ i)
+	{	s = Struct[class, i]
+		if (lines)
+		{	n = Name[s]
+			printf "# line %d \"%s\"\n", SFnr[n], SFilename[n]
+		}
+		dumpDeclarator(s)
+	}
+	if (Static[class, 0])
+	{	printf "// Static[%s, 1..%d]:\n", class, Static[class, 0]
+		for (i = 1; i <= Static[class, 0]; ++ i)
+			dumpMethod(Static[class, i])
+	}
+	if (Class[class, 0])
+	{	printf "// Class[%s, 1..%d]:\n", class, Class[class, 0]
+		for (i = 1; i <= Class[class, 0]; ++ i)
+			dumpMethod(Class[class, i])
+	}
+	if (Dynamic[class, 0])
+	{	printf "// Dynamic[%s, 1..%d]:\n", class, Dynamic[class, 0]
+		for (i = 1; i <= Dynamic[class, 0]; ++ i)
+			dumpMethod(Dynamic[class, i])
+	}
+	if (Links[class, 0])
+	{	printf "// Links[%s, 1..%d]:\n", class, Links[class, 0]
+		for (i = 1; i <= Links[class, 0]; ++ i)
+		{	s = Links[class, i]
+			printf "\t%s, tag \"%s\"\n", s, Tag[s, class]
+		}
+	}
+	print "%}"
+}
+
+function dumpMethod (m,    j) {
+	if (lines)
+		printf "# line %d \"%s\"\n", Fnr[m], Filename[m]
+	printf "\t%s %s: index %d, owner %s, nparm %d, tag \"%s\"%s\n", \
+		Linkage[m], m, Method[m], Owner[m], Nparm[m], Tag[m], \
+		Var[m] ? ", var" : ""
+	for (j = Method[m]; j <= Method[m] + Nparm[m]; ++ j)
+		dumpDeclarator(j)
+}
+
+function dumpDeclarator (d) {
+	printf "\t\t[%d] %s%s%s %s\n", d, \
+			Const[d], Type[d], As[d] ? " @" : "", Name[d]
+}

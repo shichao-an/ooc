@@ -1,0 +1,19 @@
+% move {
+%casts
+	self -> x += dx, self -> y += dy;
+}
+
+% Point ctor {
+	struct Point * self = super_ctor(Point, _self, app);
+
+	self -> x = va_arg(* app, int);
+	self -> y = va_arg(* app, int);
+	return self;
+}
+
+% Point draw {
+%casts
+	printf("\".\" at %d,%d\n", x(self), y(self));
+}
+
+%init

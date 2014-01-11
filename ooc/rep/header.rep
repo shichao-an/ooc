@@ -1,0 +1,7 @@
+% header		// header for method
+
+`result  `method  ( `{() `const `type  `_ `name `}, `,... )
+
+% const			// GNUC supports const functions
+
+`{if `GNUC 1 const  `}

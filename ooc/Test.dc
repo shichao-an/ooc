@@ -1,0 +1,39 @@
+//	Test.dc -- 5.1 Jun  6 18:18:16 1993
+//	Copyright (c) 1993 Axel T. Schreiner
+//
+line 1			implementation of class without new meta class
+line 2			// comment
+
+% tInt {
+%casts
+	return 1;
+}
+
+% tTest {
+%casts
+	return self;
+}
+
+%+ Test cInt {
+%casts
+	return 2;
+}
+
+%+ Test C {
+%casts
+}
+
+%- Test dTBase {
+%casts
+	return _self;
+}
+
+%- Test D {
+%casts
+}
+
+line -5
+line -4
+%init
+line -2
+line -1

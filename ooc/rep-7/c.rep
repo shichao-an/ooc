@@ -1,0 +1,60 @@
+// note that 'ctor' and its calling convention is burnt into this file
+//
+% init			// implement %init request
+
+`{dcl
+  `{ifnot `class `
+	`{if `newmeta 1
+
+	  `%selectors
+
+	  static  void  *  `meta _ctor  (void  *  _self,  va_list  *  app)  { `n
+	`t	struct  `meta  *  self  =  super_ctor( `meta ,  _self,  app); `n
+	`t	typedef  void  (*  voidf)  (); `n
+	`t	voidf  selector; `n
+	#ifdef  va_copy `n
+	`t	va_list  ap;  va_copy(ap,  *  app); `n
+	#else `n
+	`t	va_list  ap  =  *  app; `n
+	#endif `n `n
+
+		`%meta-ctor-loop
+	#ifdef  va_copy `n
+	`t	va_end(ap); `n
+	#endif `n
+	`t	return  self; `n
+	  } `n `n
+
+      const  void  *  `meta ; `n
+
+	`}fi
+
+	const  void  *  `class ; `n `n
+
+	void  init `class  (void)  { `n
+	  `{ifnot `super `root
+	`t	init `super (); `n `n
+	  `}fi
+
+	  `{if `newmeta 1
+	`t	if  (!  `meta ) `n
+	`t	`t	`meta  =  new( `metaroot , `n
+	`t	`t	`t	" `meta ",  `supermeta ,  sizeof(struct  `meta ), `n
+	`t	`t	`t	ctor,  `meta _ctor, `n
+				`{links `meta
+	`t	`t	`t	`method ,  `meta _ `method , `n
+				`}
+	`t	`t	`t	(void  *)  0); `n `n
+      `}fi
+
+	`t	if  (!  `class ) `n
+	`t	`t	`class  =  new( `meta , `n
+	`t	`t	`t	" `class ",  `super ,  sizeof(struct  `class ), `n
+				`{links `class
+	`t	`t	`t	`method ,  `class _ `method , `n
+				`}
+	`t	`t	`t	(void  *)  0); `n
+	} `n
+
+  `}fi
+`}dcl

@@ -1,0 +1,39 @@
+//	TBase.dc -- 5.1 Jun  6 18:17:54 1993
+//	Copyright (c) 1993 Axel T. Schreiner
+//
+line 1			implementation of class with new meta class
+line 2			// comment
+
+% sInt {
+%casts
+	return 1;
+}
+
+% sTBase {
+%casts
+	return self;
+}
+
+%+ TBase cInt {
+%casts
+	return 2;
+}
+
+%+ TBase cVoid {
+%casts
+}
+
+%- TBase dVoid {
+%casts
+}
+
+%- TBase dTBase {
+%casts
+	return _self;
+}
+
+line -5
+line -4
+%init
+line -2
+line -1

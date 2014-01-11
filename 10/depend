@@ -1,0 +1,21 @@
+Object.o: Object.c Object.h Object.r
+Filter.o: Filter.c Filter.h Object.h Filter.r Object.r
+Cmd.o: Cmd.c Cmd.h Object.h Filter.h Cmd.r Object.r
+Wc.o: Wc.c Wc.h Object.h Wc.r Object.r Filter.h
+String.o: String.c String.h Object.h String.r Object.r
+List.o: List.c List.h Object.h List.r Object.r
+Sort.o: Sort.c Sort.h List.h Object.h Sort.r List.r Object.r Filter.h \
+  String.h
+Filter.d: Object.d
+Cmd.d: Object.d
+Wc.d: Object.d
+String.d: Object.d
+List.d: Object.d
+Sort.d: List.d
+Object.c: Object.d
+Filter.c: Filter.d
+Cmd.c: Cmd.d
+Wc.c: Wc.d
+String.c: String.d
+List.c: List.d
+Sort.c: Sort.d

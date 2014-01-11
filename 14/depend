@@ -1,0 +1,55 @@
+Objct.o: Objct.c Objct.h Objct.r
+List.o: List.c List.h Objct.h List.r Objct.r
+Ic.o: Ic.c Ic.h Objct.h Ic.r Objct.r List.h
+Crt.o: Crt.c Crt.h Ic.h Objct.h Crt.r Ic.r Objct.r
+Xt.o: Xt.c Xt.h Objct.h /usr/X11R6/include/X11/Intrinsic.h \
+  /usr/X11R6/include/X11/Xlib.h /usr/X11R6/include/X11/X.h \
+  /usr/X11R6/include/X11/Xfuncproto.h /usr/X11R6/include/X11/Xosdefs.h \
+  /usr/X11R6/include/X11/Xutil.h /usr/X11R6/include/X11/keysym.h \
+  /usr/X11R6/include/X11/keysymdef.h /usr/X11R6/include/X11/Xresource.h \
+  /usr/X11R6/include/X11/Core.h /usr/X11R6/include/X11/Composite.h \
+  /usr/X11R6/include/X11/Constraint.h /usr/X11R6/include/X11/Object.h \
+  /usr/X11R6/include/X11/RectObj.h Xt.r Objct.r \
+  /usr/X11R6/include/X11/StringDefs.h /usr/X11R6/include/X11/Xaw/Label.h \
+  /usr/X11R6/include/X11/Xaw/Simple.h \
+  /usr/X11R6/include/X11/Xmu/Converters.h \
+  /usr/X11R6/include/X11/Xaw/Command.h /usr/X11R6/include/X11/Xaw/Box.h \
+  /usr/X11R6/include/X11/Xaw/Form.h Ic.h
+hello.o: hello.c Ic.h Objct.h
+button.o: button.c Ic.h Objct.h
+run.o: run.c Ic.h Objct.h
+cbutton.o: cbutton.c Crt.h Ic.h Objct.h
+crun.o: crun.c Crt.h Ic.h Objct.h
+xhello.o: xhello.c Xt.h Objct.h /usr/X11R6/include/X11/Intrinsic.h \
+  /usr/X11R6/include/X11/Xlib.h /usr/X11R6/include/X11/X.h \
+  /usr/X11R6/include/X11/Xfuncproto.h /usr/X11R6/include/X11/Xosdefs.h \
+  /usr/X11R6/include/X11/Xutil.h /usr/X11R6/include/X11/keysym.h \
+  /usr/X11R6/include/X11/keysymdef.h /usr/X11R6/include/X11/Xresource.h \
+  /usr/X11R6/include/X11/Core.h /usr/X11R6/include/X11/Composite.h \
+  /usr/X11R6/include/X11/Constraint.h /usr/X11R6/include/X11/Object.h \
+  /usr/X11R6/include/X11/RectObj.h
+xbutton.o: xbutton.c Ic.h Objct.h Xt.h /usr/X11R6/include/X11/Intrinsic.h \
+  /usr/X11R6/include/X11/Xlib.h /usr/X11R6/include/X11/X.h \
+  /usr/X11R6/include/X11/Xfuncproto.h /usr/X11R6/include/X11/Xosdefs.h \
+  /usr/X11R6/include/X11/Xutil.h /usr/X11R6/include/X11/keysym.h \
+  /usr/X11R6/include/X11/keysymdef.h /usr/X11R6/include/X11/Xresource.h \
+  /usr/X11R6/include/X11/Core.h /usr/X11R6/include/X11/Composite.h \
+  /usr/X11R6/include/X11/Constraint.h /usr/X11R6/include/X11/Object.h \
+  /usr/X11R6/include/X11/RectObj.h
+xrun.o: xrun.c Ic.h Objct.h Xt.h /usr/X11R6/include/X11/Intrinsic.h \
+  /usr/X11R6/include/X11/Xlib.h /usr/X11R6/include/X11/X.h \
+  /usr/X11R6/include/X11/Xfuncproto.h /usr/X11R6/include/X11/Xosdefs.h \
+  /usr/X11R6/include/X11/Xutil.h /usr/X11R6/include/X11/keysym.h \
+  /usr/X11R6/include/X11/keysymdef.h /usr/X11R6/include/X11/Xresource.h \
+  /usr/X11R6/include/X11/Core.h /usr/X11R6/include/X11/Composite.h \
+  /usr/X11R6/include/X11/Constraint.h /usr/X11R6/include/X11/Object.h \
+  /usr/X11R6/include/X11/RectObj.h
+List.d: Object.d
+Ic.d: Object.d
+Crt.d: Ic.d
+Xt.d: Object.d
+Object.c: Object.d
+List.c: List.d
+Ic.c: Ic.d
+Crt.c: Crt.d
+Xt.c: Xt.d

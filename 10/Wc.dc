@@ -1,0 +1,46 @@
+#include <string.h>
+
+#include "Filter.h"
+
+% Wc wc {				// (self, filter, fnm, buf)
+%casts
+	assert((lineM) wc == wc);
+
+	++ self -> lines;
+	self -> chars += strlen(buf);
+	return 0;
+}
+
+% Wc printFile {		// (self, filter, fnm)
+%casts
+	assert((wrapM) printFile == printFile);
+
+	if (fnm && strcmp(fnm, "-"))
+		printf("%7u %7u %s\n",
+					self -> lines, self -> chars, fnm);
+	else
+		printf("%7u %7u\n", self -> lines, self -> chars);
+
+	self -> allLines += self -> lines, self -> lines = 0;
+	self -> allChars += self -> chars, self -> chars = 0;
+	++ self -> files;
+	return 0;
+}
+
+% Wc printTotal {		// (self, filter)
+%casts
+	assert((quitM) printTotal == printTotal);
+
+	if (self -> files > 1)
+		printf("%7u %7u in %u files\n",
+			self -> allLines, self -> allChars, self -> files);
+	return 0;
+}
+
+%init
+
+int main (int argc, char * argv [])
+{	void * filter = new(Filter(), new(Wc()));
+
+	return mainLoop(filter, argv);
+}

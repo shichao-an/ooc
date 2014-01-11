@@ -1,0 +1,66 @@
+
+
+
+retrieve(2)                                           retrieve(2)
+
+
+NAME
+       retrieve -- get object from file
+
+SYNOPSIS
+       void * retrieve (FILE * fp)
+
+DESCRIPTION
+       retrieve() returns an object read in from the input stream
+       represented by fp.  At end of file or in case of an error,
+       retrieve() returns a null pointer.
+
+       retrieve()  requires  a  sorted  table  of  class function
+       pointers that can be produced  with  munch(1).   Once  the
+       class description has been located, retrieve() applies the
+       method geto to an area obtained with allocate.
+
+SEE ALSO
+       munch(1), Object(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          1
+
+

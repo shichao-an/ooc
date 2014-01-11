@@ -1,0 +1,13 @@
+Object.o: Object.c Object.h Object.r
+Point.o: Point.c Point.h Object.h Point.r Object.r
+Circle.o: Circle.c Circle.h Point.h Object.h Circle.r Point.r Object.r
+List.o: List.c List.h Object.h List.r Object.r
+circles.o: circles.c Circle.h Point.h Object.h
+lists.o: lists.c Circle.h Point.h Object.h List.h
+Point.d: Object.d
+Circle.d: Point.d
+List.d: Object.d
+Object.c: Object.d
+Point.c: Point.d
+Circle.c: Circle.d
+List.c: List.d

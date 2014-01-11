@@ -1,0 +1,10 @@
+$l:	Objct.o
+Objct.o:	Objct.c
+$l:	List.o
+List.o:	List.c
+$l:	Ic.o
+Ic.o:	Ic.c
+$l:	Crt.o
+Crt.o:	Crt.c
+$l:	Xt.o
+Xt.o:	Xt.c

@@ -1,0 +1,51 @@
+.\"	Exception.3 -- 1.3 Sep 26 18:06:39 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Exception 3 "local: ats"
+.SH NAME
+\f3Class  Exception: Object\fP \(em manage a stack of exception handlers
+.SH SYNOPSIS
+.nf
+Object
+    \f3Exception\fP
+.sp .5
+.B new(Exception());
+.sp .5
+.BI "int catch (" self )
+.BI "void cause (int " number )
+.fi
+.SH DESCRIPTION
+.B Exception
+is a class for managing a stack of exception handlers.
+After it is armed with
+.BR catch ,
+the newest
+.B Exception
+object can receive a nonzero exception number sent with
+.BR cause() .
+.PP
+.B ctor
+pushes the new
+.B Exception
+object onto the global exception stack,
+.B dtor
+removes it.
+These calls must be balanced.
+.PP
+.B catch
+arms its object for receiving an exception number.
+Once the number is sent,
+.B catch
+will return it.
+This function is implemented as a macro with
+.BR setjmp (3)
+and is subject to the same restrictions;
+in particular,
+the function containing the call to
+.B catch
+must still be active when the exception number is sent.
+.PP
+Other methods should generally not be applied to an
+.B Exception
+object.
+.SH SEE ALSO
+setjmp(3)

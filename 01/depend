@@ -1,0 +1,3 @@
+Set.o : new.h Set.h Object.h 
+Bag.o : new.h Set.h Object.h 
+main.o : new.h Object.h Set.h 

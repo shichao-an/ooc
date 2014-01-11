@@ -1,0 +1,45 @@
+#include "Filter.h"
+#include "String.h"
+#include <stdlib.h>
+
+% flag: Sort flags {
+%casts
+	assert((flagM) flags == flags);
+
+	if (flag == 'r')
+		self -> rflag = 1;
+	else
+		fprintf(stderr, "usage: %s [-r] [file...]\n",
+							progname(filter)),
+		exit(1);
+}
+
+% Sort line {
+%casts
+	assert((lineM) line == line);
+
+	addLast(self, new(String(), buf));
+	return 0;
+}
+
+% Sort quit {
+%casts
+	assert((quitM) quit == quit);
+
+	if (count(self))
+	{	sort(self);
+		do
+			puto(self -> rflag ? takeLast(self)
+							: takeFirst(self), stdout);
+		while (count(self));
+	}
+	return 0;
+}
+
+%init
+
+int main (int argc, char * argv [])
+{	void * filter = new(Filter(), new(Sort(), 0));
+
+	return mainLoop(filter, argv);
+}

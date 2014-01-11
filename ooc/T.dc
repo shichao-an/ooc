@@ -1,0 +1,38 @@
+//	T.dc -- 5.1 Jun  8 17:55:47 1993
+//	Copyright (c) 1993 Axel T. Schreiner
+
+// T
+
+% s {
+%casts
+}
+
+% S {
+%casts
+}
+
+%+ T c {
+}
+
+%+ T C {
+}
+
+%- T ctor {
+
+	return _self;
+}
+
+%- T D {
+}
+
+// Class
+
+% cc {
+%casts
+}
+
+% CC {
+%casts
+}
+
+%init

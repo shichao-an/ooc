@@ -1,0 +1,27 @@
+.\"	retrieve.2 -- 1.2 Sep 26 17:45:29 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH retrieve 2 "local: ats"
+.SH NAME
+retrieve \(em get object from file
+.SH SYNOPSIS
+.BI "void * retrieve (FILE * " fp )
+.SH DESCRIPTION
+.B retrieve()
+returns an object read in from the input stream represented by
+.IR fp .
+At end of file or in case of an error,
+.B retrieve()
+returns a null pointer.
+.PP
+.B retrieve()
+requires a sorted table of class function pointers
+that can be produced with
+.IR munch (1).
+Once the class description has been located,
+.B retrieve()
+applies the method
+.B geto
+to an area obtained with
+.BR allocate .
+.SH SEE ALSO
+munch(1), Object(3)

@@ -1,0 +1,12 @@
+% va			// variable argument list parameter, if any
+
+`{ifnot `,... ` ,  va_list  *  app `}
+
+% link			// component of metaclass structure
+
+`result  (*  `method )  ( `{() `const `type  `_ `name `}, `%va );
+
+% super-header	// header for super selector
+
+`result  super_ `method  (const  void  *  _class,  ` \
+			  `{() `const `type  `_ `name `}, `%va )

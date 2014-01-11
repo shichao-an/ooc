@@ -1,0 +1,66 @@
+
+
+
+Event(4)                                                 Event(4)
+
+
+NAME
+       Class  Event: Objct -- input item
+
+SYNOPSIS
+       Objct
+           Event
+       new(Event(), kind, data);
+       int kind (self)
+       void * data (self)
+
+DESCRIPTION
+       An  Event  object represents an input item such as a piece
+       of text, a mouse click, etc.
+
+       kind is zero if data is a static string.  kind is not zero
+       if data is a pointer.  In particular, a mouse click can be
+       represented with kind 1 and data pointing to an array with
+       two integer coordinates.
+
+SEE ALSO
+       Ic(4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          1
+
+

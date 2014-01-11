@@ -1,0 +1,37 @@
+.\"	Event.4 -- 1.2 Sep 30 06:37:40 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Event 4 "local: ats"
+.SH NAME
+\f3Class  Event: Objct\fP \(em input item
+.SH SYNOPSIS
+.nf
+Objct
+    \f3Event\fP
+.sp .5
+.BI "new(Event(), " kind ", " data );
+.sp .5
+.BI "int kind (" self )
+.BI "void * data (" self )
+.fi
+.SH DESCRIPTION
+An
+.B Event
+object represents an input item
+such as a piece of text, a mouse click, etc.
+.PP
+.I kind
+is zero if
+.I data
+is a static string.
+.I kind
+is not zero if
+.I data
+is a pointer.
+In particular,
+a mouse click can be represented with
+.I kind
+1 and
+.I data
+pointing to an array with two integer coordinates.
+.SH SEE ALSO
+Ic(4)

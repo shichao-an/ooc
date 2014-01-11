@@ -1,0 +1,143 @@
+% include		// #include class interface and representation
+
+#  include  " `class .h" `n
+#  include  " `class .r" `n `n
+
+% methodHeader	// method header
+
+`{if `linkage %					// static linkage
+
+  `%header  { `n
+
+`} `{else						// dynamic linkage
+
+  static  `result  `class _ `method  ` \
+			( `{() `const `type  `_ `name `}, `%va )  { `n
+`}fi
+
+% casts			// implement %casts request
+
+`{()							// import
+  `{if `_ _
+`t	`const struct  `cast  *  `name  =  ` \
+						cast( `cast (),  _ `name ); `n
+  `}fi
+`}n
+
+`{if `linkage %					// for static linkage only
+  `%checks
+`}fi
+
+% checks		// check all other object parameters
+
+`{()
+  `{ifnot `cast ` `{ifnot `_ _
+`t	cast( `cast (),  `name ); `n
+  `}fi `}fi
+`}n
+
+% meta-ctor-loop	// loop over selector/method pairs for `class
+
+`t	while  ((selector  =  va_arg(ap,  voidf))) `n
+`t	{ `t	voidf  method  =  va_arg(ap,  voidf); `n `n
+
+		`{%- `%link-it `}
+`t	} `n
+
+% link-it		// check and insert one selector/method pair
+
+`t	`t	if  (selector  ==  (voidf)  `method ) `n
+`t	`t	{ `t	*  (voidf  *)  &  self  ->  `method  =  method; `n
+`t	`t	`t	continue; `n
+`t	`t	} `n
+
+% selectors		// generate selectors and superclass selectors
+
+`{%-
+  `%selector
+  `%super-selector
+`}
+
+% selector		// selector
+
+`%header  { `n
+`%result
+`%ap
+`%classOf
+
+`%va_start
+`%ifmethod
+`%checks
+`%call
+`%va_end
+`%return
+} `n `n
+
+% result		// if necessary, define result variable
+
+`{ifnot `result void
+`t	`result  result;
+`}n
+
+% ap			// if necessary, define argument list variable
+
+`{ifnot `,... `
+`t	va_list  ap;
+`}n
+
+% classOf		// class in which to find `method
+
+`{if `meta `metaroot
+`t	const  struct  `meta  *  class  =  classOf(_self); `n
+`} `{else
+`t	const  struct  `meta  *  class  =  ` \
+						cast( `meta (),  classOf(_self)); `n
+`} `n
+
+% va_start		// if necessary, initialize argument list variable
+
+`{ifnot `,... `
+`t	va_start(ap,  `_last );
+`}n
+
+% ifmethod		// check if method exists
+
+`t	assert(class  ->  `method ); `n
+
+% call			// call the method, if necessary assign result
+
+`t	`{ifnot `result void result  =  `} \
+class  ->  `method ( `%args ); `n
+
+% args			// arguments to method
+
+`{() `_ `name `}, `{ifnot `,... ` ,  &  ap `}
+
+% va_end		// if necessary, reset argument list variable
+
+`{ifnot `,... `
+`t	va_end(ap);
+`}n
+
+% return		// if necessary, return result variable
+
+`{ifnot `result void
+`t	return  result;
+`}n
+
+% super-selector	// superclass selector
+
+`%super-header  { `n
+`{if `meta `metaroot	// can use super()
+`t	const  struct  `meta  *  superclass  =  super(_class); `n
+`} `{else				// must cast
+`t	const  struct  `meta  *  superclass  =  ` \
+							cast( `meta (),  super(_class)); `n
+`} `n
+`%checks
+
+`t	assert(superclass  ->  `method ); `n
+`t	`{ifnot `result void return  `} \
+		superclass  ->  `method \
+	( `{() `_ `name `}, `{ifnot `,... ` ,  app `} ); `n
+} `n `n

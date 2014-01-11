@@ -1,0 +1,87 @@
+# OSTYPE=darwin1.4	MacOS 10.1.2	XDarwin 1.0.4 XFree86 4.1
+# OSTYPE=darwin1.4	MacOS 10.9.1	XDarwin 13.0.0 XQuartz 2.7.5
+
+# Darwin localhost 5.2 Darwin Kernel Version 5.2: Fri Dec  7 21:39:35 PST 2001; root:xnu/xnu-201.14.obj~1/RELEASE_PPC  Power Macintosh powerpc
+# Darwin lewis.local 13.0.0 Darwin Kernel Version 13.0.0: Thu Sep 19 22:22:27 PDT 2013; root:xnu-2422.1.72~6/RELEASE_X86_64 x86_64
+
+# take note that Darwin does not distinguish upper and lower case in
+# filenames on a MacOS Extended volume...
+
+# take note that Darwin 1.0.4 curses crash if stdin is redirected away
+# from the terminal...
+
+# 01	sets bags
+# 02	strings atoms
+# 03	postfix value infix
+# 04	points circles
+# 05	value
+# 06	any points circles
+# 07	points circles queues stacks
+# 08	circles lists
+# 09	circles lists
+# 10	cmd wc sort
+# 11	value
+# 12	value
+# 13	except value
+# 14	hello button run cbutton crun xhello xbutton xrun
+
+AWK	= awk#					'new' awk
+CC	= cc -Wall -Wno-unused -g \
+	  -I/usr/X11R6/include#			how to call the C compiler
+curses	= -lcurses#				how to link curses(3)
+debug	= #					how to track memory leaks
+host	= -dis unix:0#				how to get to the X11 host
+Lm	= #					math functions
+# OOC	= ../ooc/ooc $(chapter)#		how to call the ooc script
+OOC	= ../ooc/ooc -DGNUC=1 $(chapter)#	... using const functions
+Rflag	= `if [ $* = Object ]; then echo -R; else :; fi`
+x11	= -Xlinker -multiply_defined -Xlinker suppress \
+	  -L/usr/X11R6/lib -lXaw -lXmu -lXext -lXt -lX11# how to link X11
+
+# Rflag is used to hide ooc entirely behind implicit rules.
+# otherwise we need explicit rules for Object.[chr]
+# which backfire in the early chapters.
+
+# this rule uses the GNU C compiler and ooc to produce dependencies
+# from the C source file lists $c $m and from the class list $d.
+# the rule depends on the header file lists $h and $r to simplify
+# bootstrapping. the for-loop accounts for the fact that producing
+# foo.c from foo.dc depends on foo.d -- but ooc cannot deduce that.
+
+depend:	$h $r $c $m makefile
+	  > $@
+	- if [ "$c$m" ]; then $(CC) -MM $(CFLAGS) $c $m >> $@; fi
+	- if [ "$d" ]; then $(OOC) -M $d >> $@; fi
+	- if [ "$d" ]; then \
+	    d="$d"; for i in $$d; do echo $$i.c: $$i.d; done >> $@; fi
+
+# this rule generates the dependencies of a library $l on its objects made
+# from the file list $c. this rule could be much smarter but at least
+# ESIX/make appears to be quite broken.
+
+makefile.etc:	makefile
+	for o in $(c:.c=); do \
+		echo '$$l:	'"$$o.o"; \
+		echo "$$o.o:	$$o.c"; \
+	done > $@
+
+# this rule inserts the objects $o into the library $l.
+# note that NeXTSTEP 3.1 ranlib apparently backdates the library, i.e.,
+# this rule may get executed a few times too many...
+
+mklib:	$(mklib)
+	$(AR) $(ARFLAGS) $l $o
+	ranlib $l
+.c.a:	;
+
+# these implicit rules produce header files from class description files
+# and C sources from class implementation files. in chapter 14 $(post) is
+# set to change the base class name from Object to Objct.
+
+.SUFFIXES:	.h .r .dc .d
+
+.d.h:	; $(OOC) $(Rflag) $(OOCFLAGS) $* -h $(post) > $@
+.d.r:	; $(OOC) $(Rflag) $(OOCFLAGS) $* -r $(post) > $@
+.dc.c:	; $(OOC) $(Rflag) $(OOCFLAGS) $* $*.dc $(post) > $@
+
+-include depend

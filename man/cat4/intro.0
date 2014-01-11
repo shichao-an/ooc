@@ -1,0 +1,66 @@
+
+
+
+intro(4)                                                 intro(4)
+
+
+NAME
+       intro -- introduction to the calculator application
+
+SYNOPSIS
+       Objct                         Class
+           Event
+           Ic                            IcClass
+               Button
+               Calc
+               Crt
+                   CButton
+                   CLineOut
+               LineOut
+               Mux
+           List                          ListClass
+           Xt
+               XawBox
+               XawCommand
+                   XButton
+               XawForm
+               XawLabel
+                   XLineOut
+               XtApplicationShell
+
+DESCRIPTION
+       Object(3)  is  the root class.  Object needs to be renamed
+       as Objct because the original name is used by X11.
+
+       Event(4) is a class to represent input data  such  as  key
+       presses or mouse clicks.
+
+       Ic(4)  is  the  base  class  to represent objects that can
+       receive, process, and send events.  Button converts incom-
+       ing events to events with definite text values.  Calc pro-
+       cesses texts and sends a result on.  LineOut  displays  an
+       incoming text.  Mux tries to send an incoming event to one
+       of several objects.
+
+       Crt(4) is a class to work with the curses terminal  screen
+       function  package.   It sends position events for a cursor
+       and text events for other key presses.  CButton implements
+       Button on a curses screen.  CLineOut implements LineOut.
+
+       List  manages  a list of objects and is taken from chapter
+       7.
+
+       Xt(4) is a class to work with the  X  Toolkit.   The  sub-
+       classes  wrap  toolkit and Athena widgets.  XButton imple-
+       ments a Button with a Command widget.  XLineOut implements
+       a LineOut with a Label widget.
+
+SEE ALSO
+       curses(3), X(1)
+
+
+
+
+                            local: ats                          1
+
+

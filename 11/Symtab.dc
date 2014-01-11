@@ -1,0 +1,63 @@
+#include <stdlib.h>
+#include <string.h>
+#include "binary.h"
+
+#include "Symbol.h"
+
+% Symtab ctor {
+	struct Symtab * self = super_ctor(Symtab(), _self, app);
+
+	if (! (self -> dim = va_arg(* app, size_t)))
+		self -> dim = 1;
+
+	self -> buf = malloc(self -> dim * sizeof(void *));
+	assert(self -> buf);
+	return self;
+}
+
+% : Symtab delete {		// don't delete
+}
+
+static int cmp (const void * _key, const void * _elt)
+{	const char * const * key = _key;
+	const void * const * elt = _elt;
+
+	return strcmp(* key, name(* elt));
+}
+
+static void ** search (struct Symtab * self, const char ** np)
+{
+	if (self -> count >= self -> dim)
+	{	self -> buf = realloc(self -> buf,
+						(self -> dim *= 2) * sizeof(void *));
+		assert(self -> buf);
+	}
+	return binary(np, self -> buf, & self -> count,
+										sizeof(void *), cmp);
+}
+
+% Symtab install {
+	const char * nm;
+	void ** pp;
+%casts
+	nm = name(entry);
+	pp = search(self, & nm);
+	if (* pp != nm)			// found entry
+		delete(* pp);
+	* pp = (void *) entry;
+}
+
+% Symtab screen {
+	void ** pp;
+%casts
+	pp = search(self, & name);
+	if (* pp == name)					// entered name
+	{	char * copy = malloc(strlen(name) + 1);
+
+		assert(copy);
+		* pp = new(Symbol(), strcpy(copy, name), lex);
+	}
+	return * pp;
+}
+
+%init

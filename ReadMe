@@ -1,0 +1,239 @@
+Sources for "Object-Oriented Programming with ANSI-C" (rerelease
+02-01-04 and 14-01-03)
+Copyright (c) 1993 Axel T. Schreiner, University of Osnabrueck, Germany
+
+contact ----------------------------------------------------------------
+mail: Axel T. Schreiner, 36 Muirfield Ct, Pittsford NY 14534 USA
+http://www.cs.rit.edu/~ats/, phone +1.585.264.0944
+mailto: axel@schreiner-family.net
+
+legalese ---------------------------------------------------------------
+While you may use this software package, neither I nor my employers can
+be made responsible for whatever problems you might cause or encounter.
+
+While you may give away this package and/or software derived with
+it, you should not charge for it, you should not claim that ooc is
+your work, and I have published my own book about ooc before you did.
+
+The same restrictions apply to whoever might get this package from you.
+
+executive summary ------------------------------------------------------
+ooc is a technique to do object-oriented programming (classes,
+methods, dynamic linkage, simple inheritance, polymorphisms,
+persistent objects, method existence testing, message forwarding,
+exception handling, etc.) using ANSI-C.
+
+ooc is a preprocessor to simplify the coding task by converting
+class descriptions and method implementations into ANSI-C as required
+by the technique. You implement the algorithms inside the methods
+and the ooc preprocessor produces the boilerplate.
+
+ooc consists of a shell script driving a modular awk script (with
+provisions for debugging), a set of reports -- code generation
+templates -- interpreted by the script, and the source of a root
+class to provide basic functionality.  Everything is designed to
+be changed if desired. There are manual pages, lots of examples,
+among them a calculator based on curses and X11, and you can ask
+me about the book.
+
+ooc as a technique requires an ANSI-C system -- classic C would
+necessitate substantial changes. The preprocessor needs a healthy
+Bourne-Shell and "new" awk as described in Aho, Weinberger, and
+Kernighan's book.
+
+ooc was developed primarily to teach about object-oriented programming
+without having to learn a new language. If you see how it is done
+in a familiar setting, it is much easier to grasp the concepts and
+to know what miracles to expect from the technique and what not.
+Conceivably, the preprocessor can be used for production programming
+but this was not the original intent. Being able to roll your own
+object-oriented coding techniques has its possibilities, however...
+
+technical details ------------------------------------------------------
+Most sources should be viewed with tab stops set at 4 characters.
+
+The original system ran on NeXTSTEP 3.2 and older, ESIX (System
+V) 4.0.4, and Linux 0.99.pl4-49. The first rerelease was tested on MacOS X
+version 10.1.2 and Solaris version 5.8; the second one on MacOS X 10.9.1. You need to review paths in the
+script 'ooc/ooc' before running anything. Make sure the first line
+of this script points to a Bourne-style shell. Also make sure that
+the first line of '09/munch' points to a (new) awk.
+
+The rereleased 'ooc' awk-programs have been tested with GNU awk versions
+3.0.1 and 3.0.3. Previous versions did not support AWKPATH properly
+(but this is not essential).
+
+The makefiles could be smarter but they are naive enough for all
+systems.  This is a heterogeneous system -- set the environment
+variable $OSTYPE to an architecture-specific name. 'make' in the current
+directory will create everything by calling 'make' in the various
+subdirectories. Each 'makefile' includes 'make/Makefile.$OSTYPE', review
+your 'make/Makefile.$OSTYPE' before you start.
+
+The following make calls are supported throughout:
+
+  make [all]	create examples
+  make test	[make and] run examples
+  make clean	remove all but sources
+  make depend	make dependencies (if makefile.$OSTYPE supports it)
+
+Make dependencies can be built with the -MM option of the GNU C
+compiler. They are stored in a file 'depend' in each subdirectory. They
+should apply to all systems. 'makefile.$OSTYPE' may include a target
+'depend' to recreate 'depend' -- check 'makefile.darwin1.4' for an
+example.
+
+contents ---------------------------------------------------------------
+The following is a walk through the file hierarchy in the order of
+the book:
+
+makefile	dispatch standard make calls to known directories
+
+make/
+    Makefile.*	boilerplate code for */makefile
+
+*/  depend	make dependencies
+    makefile	create and test
+
+01/*		chapter 1: abstract data types
+    sets	Set demo
+    bags	Bag demo: Set with reference count
+
+02/*		chapter 2: dynamic linkage
+    strings	String demo
+    atoms	Atom demo: unique String
+
+03/*		chapter 3: manipulating expressions with dyn. linkage
+    postfix	postfix output of expression
+    value	expression evaluation
+    infix	infix output of expression
+
+04/*		chapter 4: inheritance
+    points	Point demo
+    circles	Circle demo: Circle: Point with radius
+
+05/*		chapter 5: symbol table with inheritance
+    value	expression evaluation with vars, consts, functions
+
+06/*		chapter 6: class hierarchy and meta classes
+    any		objects that do not differ from any object
+
+ooc/*		ooc preprocessor
+    ooc		command script; review 'home' 'OOCPATH' 'AWKPATH'
+    awk/*.awk	modules
+    awk/*.dbg	debugging modules
+    rep/*.rep	reports
+    rep-*/*.rep	reports for early chapters
+
+man/ooc.1	manual page (for final version)
+
+07/*		chapter 7: ooc preprocessor; use ooc -7
+    points	Point demo: PointClass is a new metaclass
+    circles	Circle demo: Circle is a new class
+    queue	Queue demo: List is an abstract base class
+    stack	Stack demo: another subclass of List
+
+08/*		chapter 8: dynamic type checking; use ooc -8
+    circles	Circle demo: nothing changed
+    list	List demo: traps insertion of numbers or strings
+
+09/*		chapter 9: automatic initialization; use ooc -9
+    munch	awk program to collect class list from nm -p output
+    circles	Circle demo: no more init calls
+    list	List demo: no more init calls
+
+man/munch.1	manual page
+
+10/*		chapter 10: respondsTo method; use ooc -10
+    cmd		Filter demo: how flags and options are handled
+    wc		word count filter
+    sort	sorting filter, adds sort method to List
+
+11/*		chapter 11: class methods
+    value	expression evaluator, based on class hierarchy
+    value x	memory reclamation enabled
+
+man/retrieve.2	manual page
+
+c.12/*		chapter 12: persistent objects
+    value	expression evaluator, with save and load
+
+13/*		chapter 13: exception handling
+    value	expression evaluator with exception handler
+    except	Exception demo
+
+14/*		chapter 14: message forwarding
+    makefile.etc (naive) generated rules for the library
+    Xapp	resources for X11-based programs
+    hello	LineOut demo: hello, world
+    button	Button demo
+    run		terminal-oriented calculator
+    cbutton	Crt demo: hello, world changes into a
+    crun	curses-based caluclator
+    xhello	XLineOut demo: hello, world
+    xbutton	XButton demo with XawBox and XawForm
+    xrun	X11-based calculator with callbacks
+
+man/*		manual pages
+    *.1		tools
+    *.2		functions
+    *.3		some classes
+    *.4		classes in chapter 14
+
+hp700 hp/ux ------------------------------------------------------------
+c.07    Object.dc
+extern ...
+static ...
+
+        draws a warning, but uses static.
+
+c.08
+        does not trap type checking
+        use _SIGBUS rather than SIGBUS
+
+c.12
+        munch botched -- nm does not output static data symbols.
+	it looks like we have to generate fake things with ooc or
+	we have to produce classes.c on another architecture.  GNU
+	nm does not compile, it seems.
+
+sunos 4 ----------------------------------------------------------------
+must use gcc, not cc
+
+parse.c
+	strerror() does not exist -- replace call simply by "bad
+	number" (could make it from sys_nerr, etc.).  strtod() must
+	be declared by including math.h.
+
+new.r
+        need to include stddef.h to define size_t.
+
+mathlib.c
+        strerror() does not exist.
+
+binary.c
+        memmove must be replaced by bcopy (arguments reversed).
+
+Symbol.dc
+        strerror() does not exist.
+
+Object.dc/retrieve()
+        stdlib.h declares char * bsearch(), rather than void *.
+
+Object.dc/Object_geto()
+        fprintf knows %p, but fscanf does not. use %x.
+
+cbutton.c
+        ex // comments...
+
+Crt.dc
+        does not have atexit().
+
+va_copy ----------------------------------------------------------------
+C99 subtly changed the semantics of <stdarg.h> and introduced va_copy:
+at least for LLVM C and GNU C on MacOS X it is no longer legal to
+assign to a va_list. The assignment must be replaced using va_copy and
+the result must eventually be handed to va_end (see
+<http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1124.pdf>). The
+sources have been conditionalized based on va_copy to account for this
+difference.

@@ -1,0 +1,90 @@
+#include <stdlib.h>
+#include <string.h>
+
+//	Object
+
+% Object ctor {
+	return _self;
+}
+
+% Object dtor {
+	return _self;
+}
+
+% Object differ {
+	return _self != b;
+}
+
+% Object puto {
+	const struct Class * class = classOf(_self);
+
+	return fprintf(fp, "%s at %p\n", class -> name, _self);
+}
+
+% delete {
+	if (_self)
+		free(dtor(_self));
+}
+
+% classOf {
+%casts
+	assert(self -> class);
+	return self -> class;
+}
+
+% sizeOf {
+	const struct Class * class = classOf(_self);
+
+	return class -> size;
+}
+
+//	Class
+
+% Class dtor {
+%casts
+	fprintf(stderr, "%s: cannot destroy class\n", self -> name);
+	return 0;
+}
+
+% new {
+	struct Object * object;
+	va_list ap;
+%casts
+	assert(self -> size);
+	object = calloc(1, self -> size);
+	assert(object);
+	object -> class = self;
+	va_start(ap, _self);
+	object = ctor(object, & ap);
+	va_end(ap);
+	return object;
+}
+
+% super {
+%casts
+	assert(self -> super);
+	return self -> super;
+}
+
+//	initialization
+//    _Class and _Object are statically initialized structures
+
+static const struct Class _Object;
+static const struct Class _Class;
+
+%init
+
+static const struct Class _Object = {
+	{ & _Class },
+	"Object", & _Object, sizeof(struct Object),
+	Object_ctor, Object_dtor, Object_differ, Object_puto
+};
+
+static const struct Class _Class = {
+	{ & _Class },
+	"Class", & _Object, sizeof(struct Class),
+	Class_ctor, Class_dtor, Object_differ, Object_puto
+};
+
+const void * Object = & _Object;
+const void * Class = & _Class;

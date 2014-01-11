@@ -1,0 +1,13 @@
+Object.o: Object.c Object.h Object.r
+Node.o: Node.c Node.h Object.h Node.r Object.r parse.h Symbol.h
+Symbol.o: Symbol.c Symbol.h Object.h Symbol.r Object.r parse.h Node.h
+Symtab.o: Symtab.c Symtab.h Object.h Symtab.r Object.r binary.h Symbol.h
+binary.o: binary.c binary.h
+parse.o: parse.c parse.h Node.h Object.h Symbol.h Symtab.h
+Node.d: Object.d
+Symbol.d: Object.d
+Symtab.d: Object.d
+Object.c: Object.d
+Node.c: Node.d
+Symbol.c: Symbol.d
+Symtab.c: Symtab.d

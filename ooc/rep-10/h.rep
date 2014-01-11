@@ -1,0 +1,24 @@
+% -h			// implement -h option
+
+#  ifndef  `class _h `n
+#  define  `class _h `n `n
+
+#  include  " `super .h" `n `n
+
+`{pub
+  `{if `class `
+    `line `n
+  `} `{else `n
+    extern  const  void  *  `%const `class  (void); `n `n
+
+    `{% `%header ; `n `}n
+
+    `{if `newmeta 1
+      `{%- `%header ; `n `}n
+      extern  const  void  *  `%const `meta  (void); `n `n
+    `}
+
+  `}fi
+`}n
+
+#  endif `n

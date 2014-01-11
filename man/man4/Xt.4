@@ -1,0 +1,125 @@
+.\"	Xt.4 -- 1.2 Sep 30 06:44:32 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Xt 4 "local: ats"
+.SH NAME
+\f3Class  Xt: Object\fP \(em input/output objects for X11
+.SH SYNOPSIS
+.nf
+Objct
+    \f3Xt\fP
+        XawBox
+        XawCommand
+            XButton
+        XawForm
+        XawLabel
+            XLineOut
+        XtApplicationShell
+.sp .5
+.B new(Xt());
+.BI "new(XtApplicationShell(), & " argc ", " argv );
+\f3new(XawBox(), \f2parent\f3, "\f2name\f3");\f1
+\f3new(XawCommand(), \f2parent\f3, "\f2name\f3");\f1
+\f3new(XawForm(), \f2parent\f3, "\f2name\f3");\f1
+\f3new(XawLabel(), \f2parent\f3, "\f2name\f3");\f1
+\f3new(XButton(), \f2parent\f3, "\f2name\f3", "\f2label\f3");\f1
+\f3new(XLineOut(), \f2parent\f3, "\f2name\f3", "\f2label\f3");\f1
+.sp .5
+\f3void * makeWidget (\f2self\f3, WidgetClass \f2wc\f3, va_list * \f2app\f3)\f1
+.BI "void addAllAccelerators (" self )
+\f3void setLabel (\f2self\f3, const char * \f2label\f3)\f1
+\f3void addCallback (\f2self\f3, XtCallbackProc \f2fun\f3, XtPointer \f2data\f3)\f1
+.sp .5
+.BI "void mainLoop (" self )
+.fi
+.SH DESCRIPTION
+An
+.B Xt
+object wraps a widget from the X toolkit.
+.B makeWidget()
+is used to create and install the widget in the hierarchy;
+it takes a
+.I parent
+.B Xt
+object and a widget
+.I name
+from the argument list pointer to which
+.I app
+points.
+.B addAllAccelerators()
+is used to install the accelerators below the
+.B Xt
+object.
+.B setLabel()
+sets the
+.B label
+resource.
+.B addCallback()
+adds a callback function to the
+.B callback
+list.
+.PP
+An
+.B XtApplicationShell
+object wraps an application shell widget from the X toolkit.
+When it is created,
+the shell widget is also created
+and X toolkit options are removed from the main program
+argument list passed to
+.BR new() .
+The application main loop is
+.BR mainLoop() .
+.PP
+.BR XawBox ,
+.BR XawCommand ,
+.BR XawForm ,
+and
+.BR XawLabel
+objects wrap the corresponding Athena widgets.
+When they are created,
+the widgets are also created.
+.B setLabel()
+is accepted by
+.B XawCommand
+and
+.BR XawLabel .
+A callback function can be registered with an
+.B XawCommand
+object by
+.BR addCallback() .
+.PP
+An
+.B XButton
+object is a
+.B Button
+object implemented with an
+.B XawCommand
+object.
+It forwards
+.B wire()
+to its internal
+.B Button
+object and it sets a callback to
+.B gate()
+to this button
+so that it sends its
+.I text
+on if
+.B notify()
+is executed, i.e., if the button is clicked.
+Accelerators can be used to arrange for other calls to
+.BR notify() .
+.PP
+An
+.B XLineOut
+object is a
+.B LineOut
+object implemented with an
+.B XawLabel
+object.
+It forwards
+.B gate()
+to itself to receive and display a string.
+If permitted by the parent widget,
+its widget will change its size according to the string.
+.SH SEE ALSO
+Event(4)

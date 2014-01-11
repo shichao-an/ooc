@@ -1,0 +1,118 @@
+#include <stdlib.h>
+#include <string.h>
+
+#ifndef	MIN
+#define	MIN	32		// minimal buffer dimension
+#endif
+
+% List ctor {
+	struct List * self = super_ctor(List(), _self, app);
+
+	if (! (self -> dim = va_arg(* app, unsigned)))
+		self -> dim = MIN;
+	self -> buf = malloc(self -> dim * sizeof * self -> buf);
+	assert(self -> buf);
+	return self;
+}
+
+% List dtor {
+%casts
+	free(self -> buf), self -> buf = 0;
+	return super_dtor(List(), self);
+}
+
+% List puto {
+	int result;
+	unsigned i;
+%casts
+	result = super_puto(List(), self, fp);
+	result += fprintf(fp, "\tdim %u, count %u {\n",
+							self -> dim, self -> count);
+	for (i = 0; i < self -> count; ++ i)
+		putc(' ', fp),
+		result += 1 + puto(self -> buf[(self -> begin + i)
+									% self -> dim], fp);
+	return result + fputs("}\n", fp);
+}
+
+static void * add1 (struct List * self, const void * element)
+{
+	self -> end = self -> count = 1;
+	return (void *) (self -> buf[self -> begin = 0] = element);
+}
+
+static void extend (struct List * self)	// one more element
+{
+	if (self -> count >= self -> dim)
+	{	self -> buf =
+				realloc(self -> buf, 2 * self -> dim
+						* sizeof * self -> buf);
+		assert(self -> buf);
+		if (self -> begin && self -> begin != self -> dim)
+		{	memcpy(self -> buf + self -> dim + self -> begin,
+				self -> buf + self -> begin,
+				(self -> dim - self -> begin)
+						* sizeof * self -> buf);
+			self -> begin += self -> dim;
+		}
+		else
+			self -> begin = 0;
+		self -> dim *= 2;
+	}
+	++ self -> count;
+}
+
+% List addFirst {
+%casts
+	if (! self -> count)
+		return add1(self, element);
+	extend(self);
+	if (self -> begin == 0)
+		self -> begin = self -> dim;
+	self -> buf[-- self -> begin] = element;
+	return (void *) element;
+}
+
+% List addLast {
+%casts
+	if (! self -> count)
+		return add1(self, element);
+	extend(self);
+	if (self -> end >= self -> dim)
+		self -> end = 0;
+	self -> buf[self -> end ++] = element;
+	return (void *) element;
+}
+
+% List count {
+%casts
+	return self -> count;
+}
+
+% List lookAt {
+%casts
+	return (void *) (n >= self -> count ? 0 :
+		self -> buf[(self -> begin + n) % self -> dim]);
+}
+
+% List takeFirst {
+%casts
+	if (! self -> count)
+		return 0;
+	-- self -> count;
+	if (self -> begin >= self -> dim)
+		self -> begin = 0;
+	return (void *) self -> buf[self -> begin ++];
+}
+
+% List takeLast {
+%casts
+	if (! self -> count)
+		return 0;
+	-- self -> count;
+	if (self -> end == 0)
+		self -> end = self -> dim;
+	return (void *) self -> buf[-- self -> end];
+}
+
+%init

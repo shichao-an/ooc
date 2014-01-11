@@ -1,0 +1,133 @@
+.\"	Object.3 -- 1.4 Sep 26 18:08:58 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Object 3 "local: ats"
+.SH NAME
+\f3Class  Object\fP \(em root class
+.SH SYNOPSIS
+.nf
+\f3Object\fP
+    Class
+.sp .5
+.B new(Object());
+.sp .5
+.B "typedef void (* Method) ();"
+.sp .5
+.BI "const void * classOf (const " self )
+.BI "size_t sizeOf (const " self )
+.BI "int isA (const " self ", const Class @ " class )
+.BI "int isOf (const " self ", const Class @ " class )
+.BI "void * cast (const Class @ " class ", const " self )
+.BI "Method respondsTo (const " self ", const char * " tag )
+.B %\(mi
+.BI "void * ctor (" self ", va_list * " app )
+.BI "void delete (" self )
+.BI "void * dtor (" self )
+.BI "int puto (const " self ", FILE * " fp )
+.BI "void * geto (" self ", FILE * " fp )
+\f3void forward (\f2self\f3, void * \f2result\f3, Method \f2selector\f3, const char * \f2name\f3, ...)\f1
+.B %+
+.BI "Object @ new (const " self ", ...)"
+.fi
+.SH DESCRIPTION
+.B Object
+is the root class;
+all classes and metaclasses have
+.B Object
+as their ultimate superclass.
+Metaclasses have
+.B Class
+as their penultimate superclass.
+.PP
+.B classOf
+returns the class description of an object;
+.B sizeOf
+returns the size in bytes.
+.PP
+.B isA
+returns true if an object is described by a specific class description,
+i.e., if it belongs to that class.
+.B isA
+is false for null pointers.
+.B isOf
+returns true, if an object belongs to a specific class
+or has it as a superclass.
+.B isOf
+is false for null pointers and true for any object and the class
+.BR Object .
+.PP
+.B cast
+checks if its second argument is described,
+directly or ultimately, by the first.
+If not, and in particular for null pointers,
+the calling program is terminated.
+.B cast
+normally returns its second argument unchanged;
+for efficiency,
+.B cast
+could be replaced by a macro.
+.PP
+.B respondsTo
+returns zero or a method selector
+corresponding to a tag for some object.
+If the result is not null,
+the object with other arguments as appropriate can be passed to this selector.
+.PP
+.B ctor
+is the constructor.
+It receives the additional arguments from
+.BR new .
+It should first call
+.BR super_ctor ,
+which may use up part of the argument list,
+and then handle its own initialization from the rest of the argument list.
+.PP
+Unless overwritten,
+.B delete
+destroys an object by calling
+.B dtor
+and sending the result to
+.BR free (3).
+Null pointers may not be passed to
+.BR delete .
+.PP
+.B dtor
+is responsible for reclaiming resources acquired by the object.
+It will normally call
+.B super_dtor
+and let it determine its result.
+If a null pointer is returned,
+.B delete
+will effectively not reclaim the space for the object.
+.PP
+.B puto
+writes an \s-1ASCII\s0 representation of an object to a stream.
+It will normally call
+.B puto
+for the superclass so that the output starts with the class name.
+The representation must be designed so that
+.B geto
+can retrieve all but the class name from the stream
+and place the information into the area passed as first argument.
+.B geto
+works just like
+.B ctor
+and will normally let the superclass
+.B geto
+handle the part
+written by the superclass
+.BR puto .
+.PP
+.B forward
+is called by a selector
+if it cannot be applied to an object.
+The method can be overwritten to forward messages.
+.PP
+Unless overwritten,
+.B new
+calls
+.B allocate
+and passes the result to
+.B ctor
+together with its remaining arguments.
+.SH SEE ALSO
+ooc(1), retrieve(2), Class(3)

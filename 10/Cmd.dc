@@ -1,0 +1,39 @@
+% Cmd flag {
+	const char * value;
+%casts
+	assert((flagM) flag == flag);
+
+	switch (flg) {
+	case 'f':
+		puts("-f");
+		break;
+	case 'v':
+		if ((value = argval(filter)))
+			printf("-v \"%s\"\n", value);
+		else
+			puts("-v NULL");
+		break;
+	default:
+		fprintf(stderr, "%s: unknown flag '%c'\n",
+			progname(filter), flg);
+	}
+}
+
+% Cmd name {
+%casts
+	assert((nameM) name == name);
+
+	if (arg)
+		printf("name \"%s\"\n", arg);
+	else
+		puts("name NULL");
+	return 0;
+}
+
+%init
+
+int main (int argc, char * argv [])
+{	void * filter = new(Filter(), new(Cmd()));
+
+	return mainLoop(filter, argv);
+}

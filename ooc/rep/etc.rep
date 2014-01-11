@@ -1,0 +1,181 @@
+% include		// #include class interface and representation
+
+#  include  " `class .h" `n
+#  include  " `class .r" `n `n
+`#line `
+
+% methodHeader	// method header
+
+`#line `method
+`{if `linkage %					// static linkage
+
+  `%header  { `n
+
+`} `{else						// dynamic linkage
+
+  static  `result  `class _ `method  ` \
+			( `{() `const `type  `_ `name `}, `%va )  { `n
+`}fi
+`#line `
+
+% casts			// implement %casts request
+
+`{()							// import
+  `{if `_ _
+`t	`const struct  `cast  *  `name  =  ` \
+						cast( `cast (),  _ `name ); `n
+  `}fi
+`}n
+
+`{if `linkage %					// for static linkage only
+  `%checks
+`}fi
+`#line `
+
+% checks		// check all other object parameters
+
+`{()
+  `{ifnot `cast ` `{ifnot `_ _
+`t	cast( `cast (),  `name ); `n
+  `}fi `}fi
+`}n
+
+% meta-ctor-loop	// selector/tag/method tuples for `class
+
+`t	while  ((selector  =  va_arg(ap,  Method))) `n
+`t	{ `t	const  char  *  tag  =  va_arg(ap,  ` \
+									const  char  *); `n
+	`t	`t	Method  method  =  va_arg(ap,  Method); `n `n
+
+		`{%- `%link-it `}
+		`{%+ `%link-it `}
+`t	} `n
+
+% link-it		// check and insert one selector/method pair
+
+`t	`t	if  (selector  ==  (Method)  `method ) `n
+`t	`t	{ `t	if  (tag) `n
+`t	`t	`t	`t	self  ->  `method .tag  =  tag, `n
+`t	`t	`t	`t	self  ->  `method .selector  =  selector; `n
+`t	`t	`t	self  ->  `method .method  =  method; `n
+`t	`t	`t	continue; `n
+`t	`t	} `n
+
+% selectors		// generate selectors and superclass selectors
+
+`{%-
+  `%selector
+  `%super-selector
+`}
+
+`{%+
+  `%selector
+  `%super-selector
+`}
+
+% selector		// selector, forwarded if method does not exist
+
+`#line `method
+`%header  { `n
+`%result
+`%ap
+`%classOf
+
+`%va_start
+`%ifmethod
+`%checks
+`%call
+`t	}  else `n
+`%forward
+`%va_end
+`%return
+} `n `n
+
+% result		// if necessary, define result variable
+
+`{ifnot `result void
+`t	`result  result;
+`}n
+
+% ap			// if necessary, define argument list variable
+
+`{ifnot `,... `
+`t	va_list  ap;
+`}n
+
+% classOf		// class in which to find `method
+
+`{if `linkage %-
+`{if `meta `metaroot
+`t	const  struct  `meta  *  class  =  classOf(_self); `n
+`} `{else
+`t	const  struct  `meta  *  class  =  ` \
+						(const  void  *)  classOf(_self); `n
+`}
+`} `{else
+`t	const  struct  `meta  *  class  =  ` \
+						cast( `metaroot (),  _self); `n
+`} `n
+
+% va_start		// if necessary, initialize argument list variable
+
+`{ifnot `,... `
+`t	va_start(ap,  `_last );
+`}n
+
+% ifmethod		// check if method exists
+
+`{if `meta `metaroot
+`t	if  (class  ->  `method .method)
+`} `{else
+`t	if  (isOf(class,  `meta ())  &&  class  ->  `method .method)
+`}  { `n
+
+% call			// call the method, if necessary assign result
+
+`t	`t	`{ifnot `result void result  =  `} \
+(( `result  (*)  ())  class  ->  `method .method) ( `%args ); `n
+
+% forward		// forward the call, but don't forward forward
+
+`{if `method forward
+`t	`t	assert(0);
+`} `{else
+`t	`t	forward(_self, \
+			`{if `result void  0,  `} `{else  &  result,  `} \
+			(Method)  `method ,  " `method ",  `%args );
+`} `n
+
+% args			// arguments to method
+
+`{() `_ `name `}, `{ifnot `,... ` ,  &  ap `}
+
+% va_end		// if necessary, reset argument list variable
+
+`{ifnot `,... `
+`t	va_end(ap);
+`}n
+
+% return		// if necessary, return result variable
+
+`{ifnot `result void
+`t	return  result;
+`}n
+
+% super-selector	// superclass selector, not forwarded
+
+`#line `method
+`%super-header  { `n
+`{if `meta `metaroot	// can use super()
+`t	const  struct  `meta  *  superclass  =  super(_class); `n
+`} `{else				// must cast
+`t	const  struct  `meta  *  superclass  =  ` \
+							cast( `meta (),  super(_class)); `n
+`} `n
+`%checks
+
+`t	assert(superclass  ->  `method .method); `n
+`t	`{ifnot `result void return  `} \
+		(( `result  (*)  ())  superclass  ->  `method .method) \
+	( `{() `_ `name `}, `{ifnot `,... ` ,  app `} ); `n
+} `n `n

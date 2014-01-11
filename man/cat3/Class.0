@@ -1,0 +1,132 @@
+
+
+
+Class(3)                                                 Class(3)
+
+
+NAME
+       Class  Class: Object - root metaclass
+
+SYNOPSIS
+       Object
+           Class
+       new(Class(), name, superclass, size, selector, tag, method, ... , 0);
+       Object @ allocate (const self)
+       const Class @ super (const self)
+       const char * nameOf (const self)
+
+DESCRIPTION
+       A  metaclass  object  describes a class, i.e., it contains
+       the class name,  a  pointer  to  the  class'  super  class
+       description,  the  size  of  an  object  in the class, and
+       information about all dynamically linked methods which can
+       be applied to objects of the class.  This information con-
+       sists of a pointer to the selector function, a tag  string
+       for  the  respondsTo  method  (which  may be empty), and a
+       pointer to the actual method function for objects  of  the
+       class.
+
+       A metaclass is a collection of metaclass objects which all
+       contain the same variety of method informations, where, of
+       course, each metaclass object may point to different meth-
+       ods.  A metaclass description describes a metaclass.
+
+       Class is the root metaclass.  There is a metaclass  object
+       Class  which  describes  the metaclass Class.  Every other
+       metaclass X is described by some other metaclass object  X
+       which is a member of Class.
+
+       The  metaclass  Class  contains  a metaclass object Object
+       which describes the root class Object.   A  new  class  Y,
+       which  has the same dynamically bound methods as the class
+       Object, is described by a metaclass object Y, which  is  a
+       member of Class.
+
+       A  new  class  Z, which has more dynamically bound methods
+       than Object, requires a metaclass object  Z,  which  is  a
+       member  of  a  new  metaclass M.  This new metaclass has a
+       metaclass description M, which is a member of Class.
+
+       The Class constructor is used to build new class  descrip-
+       tion objects like Y and metaclass description objects like
+       M.  The M constructor is used to build new class  descrip-
+       tion  objects  like  Z.   The Y constructor builds objects
+       which are members of class Y, and the Z constructor builds
+       objects in class Z.
+
+       allocate  reserves  memory  for  an object of its argument
+       class and installs this class  as  the  class  description
+       pointer.   Unless  overwritten,  new  calls  allocate  and
+       applies ctor to the result.  retrieve calls  allocate  and
+
+
+
+                            local: ats                          1
+
+
+
+
+
+Class(3)                                                 Class(3)
+
+
+       applies geto to the result.
+
+       super returns the superclass from a class description.
+
+       nameOf returns the name from a class description.
+
+       The  Class  constructor  ctor  handles method inheritance.
+       Only information about overwritten  methods  needs  to  be
+       passed to new.  The information consists of the address of
+       the selector to locate the method, a tag string which  may
+       be  empty,  and the address of the new method.  The method
+       information tuples may appear in  any  order  of  methods;
+       zero in place of a selector terminates the list.
+
+       delete,  dtor, and geto are inoperative for class descrip-
+       tions.
+
+       Class descriptions are only accessed by means of functions
+       which initialize the description during the first call.
+
+SEE ALSO
+       ooc(1), retrieve(2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          2
+
+

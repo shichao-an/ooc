@@ -1,0 +1,62 @@
+#!/bin/sh
+#	regress -- 5.5 Thu Jan  3 18:54:44 EST 2002
+#	Copyright (c) 1993 Axel T. Schreiner
+
+	tmp=tmp~
+	tests='T TBase Test'
+
+	if [ $# = 0 ]
+	then	set $tests
+	fi
+
+usage()
+{	echo >&2 "usage: regress options... clean clobber retract $tests ..."
+	exit 1
+}
+
+regress() # options desc
+{	eval desc=\$$#
+
+	if grep >/dev/null \
+	     '^%[         ]*[^:]*[        ]*[^:]*[        ]*{$' $desc.d
+	then	R=-R
+	else	R=
+	fi
+
+	echo >&2 ooc -M $R $* -dc -h -r $desc.dc \> $desc
+
+	if [ -r $desc ]
+	then	if ooc -M $R $* -dc -h -r $desc.dc | tee $tmp | cmp -s - $desc
+		then	rm -f $tmp
+		else	rm -f $desc~; mv $desc $desc~; mv $tmp $desc
+			echo $desc '<old >new'
+			diff $desc~ $desc
+			echo mv $desc~ $desc >> retract~
+		fi
+	else	rm -f $3~
+		echo $3 new
+		ooc -M $R $* -dc -h -r $desc.dc > $desc
+	fi
+}
+
+new=yes options=
+for i
+do	case $i
+	in -*)		options="$options $i"
+	;; clean)	rm -f *~
+	;; clobber)	rm -f *~ $tests
+	;; retract)	if [ -r retract~ ]
+			then	sh -x retract~
+				rm retract~
+			fi
+	;; *)		if [ -r $i.d ]
+			then	if [ "$new" ]
+				then	rm -f retract~
+					new=
+				fi
+				regress $options $i
+			else	usage
+			fi
+	esac
+	shift
+done

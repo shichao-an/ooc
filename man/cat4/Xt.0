@@ -1,0 +1,132 @@
+
+
+
+Xt(4)                                                       Xt(4)
+
+
+NAME
+       Class  Xt: Object -- input/output objects for X11
+
+SYNOPSIS
+       Objct
+           Xt
+               XawBox
+               XawCommand
+                   XButton
+               XawForm
+               XawLabel
+                   XLineOut
+               XtApplicationShell
+       new(Xt());
+       new(XtApplicationShell(), & argc, argv);
+       new(XawBox(), parent, "name");
+       new(XawCommand(), parent, "name");
+       new(XawForm(), parent, "name");
+       new(XawLabel(), parent, "name");
+       new(XButton(), parent, "name", "label");
+       new(XLineOut(), parent, "name", "label");
+       void * makeWidget (self, WidgetClass wc, va_list * app)
+       void addAllAccelerators (self)
+       void setLabel (self, const char * label)
+       void addCallback (self, XtCallbackProc fun, XtPointer data)
+       void mainLoop (self)
+
+DESCRIPTION
+       An  Xt object wraps a widget from the X toolkit.  makeWid-
+       get() is used to create and  install  the  widget  in  the
+       hierarchy;  it  takes a parent Xt object and a widget name
+       from the  argument  list  pointer  to  which  app  points.
+       addAllAccelerators()  is  used to install the accelerators
+       below the Xt object.  setLabel() sets the label  resource.
+       addCallback()  adds  a  callback  function to the callback
+       list.
+
+       An XtApplicationShell object wraps  an  application  shell
+       widget  from the X toolkit.  When it is created, the shell
+       widget is also created and X toolkit options  are  removed
+       from  the main program argument list passed to new().  The
+       application main loop is mainLoop().
+
+       XawBox, XawCommand, XawForm, and XawLabel objects wrap the
+       corresponding  Athena widgets.  When they are created, the
+       widgets are also created.  setLabel() is accepted by  Xaw-
+       Command  and  XawLabel.  A callback function can be regis-
+       tered with an XawCommand object by addCallback().
+
+       An XButton object is a Button object implemented  with  an
+       XawCommand  object.   It  forwards  wire() to its internal
+       Button object and it sets a callback  to  gate()  to  this
+       button  so  that  it sends its text on if notify() is exe-
+       cuted, i.e., if the button is clicked.   Accelerators  can
+
+
+
+                            local: ats                          1
+
+
+
+
+
+Xt(4)                                                       Xt(4)
+
+
+       be used to arrange for other calls to notify().
+
+       An XLineOut object is a LineOut object implemented with an
+       XawLabel object.  It forwards gate() to itself to  receive
+       and  display a string.  If permitted by the parent widget,
+       its widget will change its size according to the string.
+
+SEE ALSO
+       Event(4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          2
+
+

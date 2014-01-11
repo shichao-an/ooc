@@ -1,0 +1,32 @@
+#include <stdlib.h>
+#include <string.h>
+
+% String ctor {
+	struct String * self = super_ctor(String(), _self, app);
+	const char * text = va_arg(* app, const char *);
+
+	self -> text = malloc(strlen(text) + 1);
+	assert(self -> text);
+	strcpy((char *) self -> text, text);
+	return self;
+}
+
+% String dtor {
+%casts
+	free((void *) self -> text), self -> text = 0;
+	return super_dtor(String(), self);
+}
+
+% String puto {
+%casts
+	return fputs(self -> text, fp);
+}
+
+% String differ {
+	struct String * self = cast(String(), _self);
+	struct String * sp = cast(String(), b);
+
+	return self == sp ? 0 : strcmp(self -> text, sp -> text);
+}
+
+%init

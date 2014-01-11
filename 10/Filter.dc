@@ -1,0 +1,155 @@
+#include <stdlib.h>
+#include <string.h>
+
+% Filter ctor {
+	struct Filter * self = super_ctor(Filter(), _self, app);
+
+	self -> delegate = va_arg(* app, void *);
+
+	self -> flag = (flagM) respondsTo(self -> delegate, "flag");
+	self -> name = (nameM) respondsTo(self -> delegate, "name");
+	self -> file = (fileM) respondsTo(self -> delegate, "file");
+	self -> line = (lineM) respondsTo(self -> delegate, "line");
+	self -> wrap = (wrapM) respondsTo(self -> delegate, "wrap");
+	self -> quit = (quitM) respondsTo(self -> delegate, "quit");
+
+	return self;
+}
+
+% Filter dtor {
+%casts
+	if (self -> buf)
+		free(self -> buf);
+	return super_dtor(Filter(), self);
+}
+
+% mainLoop {					// (self, argv)
+	int result;
+%casts
+	self -> progname = * argv ++;
+
+	while (* argv && ** argv == '-')
+	{	switch (* ++ * argv) {
+		case 0:					// single -
+			-- * argv;			// ... is a filename
+			break;				// ... and ends options
+		case '-':
+			if (! (* argv)[1])	// two --
+			{   ++ argv;		// ... are ignored
+				break;			// ... and end options
+			}
+		default:				// rest are bundled flags
+			do
+				if (self -> flag)
+				{	self -> argv = argv;
+					self -> flag(self -> delegate,
+										self, ** argv);
+					argv = self -> argv;
+				}
+				else
+				{	fprintf(stderr,
+						"%s: -%c: no flags allowed\n",
+						self -> progname, ** argv);
+					return 1;
+				}
+			while (* ++ * argv);
+			++ argv;
+			continue;
+		}
+		break;
+	}
+
+	if (* argv)
+		do
+			result = doit(self, * argv);
+		while (! result && * ++ argv);
+	else
+		result = doit(self, NULL);
+
+	if (self -> quit)
+		result = self -> quit(self -> delegate, self);
+	return result;
+}
+
+% argval {							// (self)
+	const char * result;
+%casts
+	assert(self -> argv && * self -> argv);
+
+	if ((* self -> argv)[1])		// -fvalue
+		result = ++ * self -> argv;
+	else if (self -> argv[1])		// -f value
+		result = * ++ self -> argv;
+	else							// no more argument
+		result = NULL;
+
+	while ((* self -> argv)[1])		// skip text
+		++ * self -> argv;
+
+	return result;
+}
+
+% progname {
+%casts
+	return self -> progname;
+}
+
+% doit {					// (self, arg)
+	FILE * fp;
+	int result = 0;
+%casts
+	if (self -> name)
+		return self -> name(self -> delegate, self, arg);
+
+	if (! arg || strcmp(arg, "-") == 0)
+		fp = stdin, clearerr(fp);
+	else if (! * arg)
+	{	fprintf(stderr, "%s: null filename\n",
+								self -> progname);
+		return 1;
+	}
+	else if (! (fp = fopen(arg, "r")))
+	{	perror(arg);
+		return 1;
+	}
+
+	if (self -> file)
+		result = self -> file(self -> delegate, self, arg, fp);
+	else
+	{	if (! self -> buf)
+		{	self -> blen = BUFSIZ;
+			self -> buf = malloc(self -> blen);
+			assert(self -> buf);
+		}
+
+		while (fgets(self -> buf, self -> blen, fp))
+		{	while (strlen(self -> buf) == self -> blen - 1
+					&& self -> buf[self -> blen - 2] != '\n')
+			{	self -> blen *= 2;
+				self -> buf = realloc(self -> buf, self -> blen);
+				assert(self -> buf);
+				if (! fgets(self->buf + self->blen/2 - 1,
+							self->blen/2 + 1, fp))
+					break;
+			}
+			if (self -> line && (result =
+				self -> line(self -> delegate, self, arg,
+												self -> buf)))
+				break;
+		}
+
+		if (self -> wrap)
+			result = self -> wrap(self -> delegate, self, arg);
+	}
+
+	if (fp != stdin)
+		fclose(fp);
+
+	if (fflush(stdout), ferror(stdout))
+	{	fprintf(stderr, "%s: output error\n", self -> progname);
+		result = 1;
+	}
+	return result;
+}
+
+%init

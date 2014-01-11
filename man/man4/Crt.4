@@ -1,0 +1,83 @@
+.\"	Crt.4 -- 1.2 Sep 30 06:35:24 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Crt 4 "local: ats"
+.SH NAME
+\f3IcClass  Crt: Ic\fP \(em input/output objects for curses
+.SH SYNOPSIS
+.nf
+Objct
+    Ic
+        \f3Crt\fP
+            CButton
+            CLineout
+.sp .5
+.B new(Crt());
+\f3new(CButton(), "\f2text\fP", \f2y\f3, \f2x\f3);\f1
+\f3new(CLineOut(), \f2\y\f3, \f2x\f3, \f2len\f3);\f1
+.sp .5
+\f3void makeWindow (\f2self\f3, int \f2rows\f3, int \f2cols\f3, int \f2x\f3, int \f2y\f3)\f1
+\f3void addStr (\f2self\f3, int \f2y\f3, int \f2x\f3, const char * \f2s\f3)\f1
+.BI "void crtBox (" self )
+.SH DESCRIPTION
+A
+.B Crt
+object wraps a
+.IR curses (3)
+window.
+.I curses
+is initialized
+when the first
+.B Crt
+object is created.
+.PP
+.B Crt_gate()
+is the event loop:
+it monitors the keyboard;
+it implements a
+.IR vi -style
+cursor move for the keys
+.BR hjkl ,
+and possibly, for the arrow keys;
+if
+.I return
+is pressed, it sends an
+.B Event
+object with
+.I kind
+1 and an array with column and row position;
+if
+.IR control -D
+is pressed,
+.B gate
+returns
+.BR reject ;
+any other key is sent on as an
+.B Event
+object with a string containing the key character.
+.PP
+A
+.B CLineOut
+object implements a
+.B LineOut
+object on a
+.I curses
+screen.
+Incoming strings should not exceed
+.I len
+bytes.
+.PP
+A
+.B CButton
+object implements a
+.B Button
+object on a
+.I curses
+screen.
+If it receives a matching text, it sends it.
+Additionally, if it receives a position event,
+e.g., from a
+.B Crt
+object,
+and if the coordinates are within its window, it sends its text on.
+.SH SEE ALSO
+Event(4)

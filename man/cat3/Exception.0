@@ -1,0 +1,66 @@
+
+
+
+Exception(3)                                         Exception(3)
+
+
+NAME
+       Class   Exception:  Object  -- manage a stack of exception
+       handlers
+
+SYNOPSIS
+       Object
+           Exception
+       new(Exception());
+       int catch (self)
+       void cause (int number)
+
+DESCRIPTION
+       Exception is a class for managing  a  stack  of  exception
+       handlers.  After it is armed with catch, the newest Excep-
+       tion object can receive a nonzero  exception  number  sent
+       with cause().
+
+       ctor  pushes  the  new  Exception  object  onto the global
+       exception stack, dtor removes it.   These  calls  must  be
+       balanced.
+
+       catch  arms  its object for receiving an exception number.
+       Once the number is sent, catch will return it.  This func-
+       tion  is implemented as a macro with setjmp(3) and is sub-
+       ject to the same restrictions; in particular, the function
+       containing the call to catch must still be active when the
+       exception number is sent.
+
+       Other methods should generally not be applied to an Excep-
+       tion object.
+
+SEE ALSO
+       setjmp(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          1
+
+

@@ -1,0 +1,30 @@
+% -r			// implement -r option
+
+#  ifndef  `class _r `n
+#  define  `class _r `n `n
+
+#  include  " `super .r" `n `n
+
+`{prot
+  `{if `class `
+    `line `n
+  `} `{else `n
+    struct  `class  {  const  struct  `super  _; `n
+      `{struct `class
+`t	`const `type  `name ; `n
+      `}
+    }; `n `n
+
+    `{if `newmeta 1
+
+      struct  `meta  {  const  struct  `supermeta  _; `n
+        `{%- `t `%link `n `}
+      }; `n `n
+
+      `{%- `%super-header ; `n `}n
+
+    `}fi
+  `}fi
+`}n
+
+#  endif `n

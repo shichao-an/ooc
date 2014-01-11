@@ -1,0 +1,12 @@
+Class(3), f3Class  Class: Object(3) - root metaclass
+Crt(4), f3IcClass(4)     - Crt: Ic  input/output objects for curses
+Event(4), f3Class(4)     - Event: Objct  input item
+Exception(3), f3Class(3) - Exception: Object  manage a stack of exception handlers
+Ic(4), f3IcClass:(4)     - Class  Ic: Objct  basic input/output/transput objects
+Object(3), f3Class(3)    - Object  root class
+Xt(4), f3Class(4)        - Xt: Object  input/output objects for X11
+intro(3)                 - introduction to the root classes
+intro(4)                 - introduction to the calculator application
+munch(1)                 - produce class list
+ooc(1)                   - preprocessor for object-oriented coding in *(AC
+retrieve(2)              - get object from file

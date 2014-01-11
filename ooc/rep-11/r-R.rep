@@ -1,0 +1,36 @@
+// differences from r.rep:
+//	there is no superclass header to include
+//	we generate `root and `metaroot at % root in `{dcl, because
+//	we explicitely insert the `root `{%- `{%+ into struct `metaroot
+//
+% -r			// implement -r option for root class
+
+#  ifndef  `class _r `n
+#  define  `class _r `n `n
+
+`{prot
+  `{if `class `
+    `line `n
+  `} `{else `{if `class `root `n
+    struct  `root  { `n
+      `{struct `root
+	`t	`const `type  `name ; `n
+      `}
+    }; `n `n
+
+    struct  `metaroot  {  struct  `root  _; `n
+      `{struct `metaroot
+	`t	`const `type  `name ; `n
+      `}n
+
+      `{%- `t `%link `n `}
+      `{%+ `t `%link `n `}
+    }; `n `n
+
+    `{%- `%super-header ; `n `}n
+    `{%+ `%super-header ; `n `}n
+
+  `}fi `}fi
+`}n
+
+#  endif `n

@@ -1,0 +1,148 @@
+Test.d: TBase.d
+//
+//
+
+% Test tInt { // int tInt (int i, void * _self, void * _v, const void * o, ...)
+%casts
+
+	return (int) 0;
+}
+
+% Test tTest { // const struct Test * tTest (const void * _self)
+%casts
+
+	return (const struct Test *) 0;
+}
+
+% Test dVoid { // void dVoid (int i, void * _self, void * _v, void * t, const void * o, ...)
+%casts
+
+}
+
+% Test dTBase { // const struct TBase * dTBase (const void * _self)
+%casts
+
+	return (const struct TBase *) 0;
+}
+
+% Test cInt { // const int cInt (int i, void * _self, void * _v, void * t, const void * o, ...)
+%casts
+
+	return (const int) 0;
+}
+
+% Test cVoid { // void cVoid (const void * _self)
+%casts
+
+}
+
+% Test ctor { // void * ctor (void * _self, va_list * app)
+%casts
+
+	return (void *) 0;
+}
+
+% Test D { // void D (void * _self)
+%casts
+
+}
+
+% Test c { // void c (void * _self)
+%casts
+
+}
+
+% Test C { // void C (void * _self)
+%casts
+
+}
+
+%init
+# ifndef Test_h
+# define Test_h
+
+# include "TBase.h"
+
+line 1			class without new meta class
+line 2
+
+extern const void * Test (void);
+
+int tInt (int i, void * _self, void * _v, const void * o, ...);
+const struct Test * tTest (const void * _self);
+
+line -2
+line -1
+
+# endif
+# ifndef Test_r
+# define Test_r
+
+# include "TBase.r"
+
+struct Test { const struct TBase _;
+	int line4;
+	int line5;
+};
+
+# endif
+# include "Test.h"
+# include "Test.r"
+
+line 1			implementation of class without new meta class
+line 2
+
+int tInt (int i, void * _self, void * _v, const void * o, ...) {
+	struct Test * self = cast(Test(), _self);
+	struct Test * v = cast(Test(), _v);
+
+	cast(Object(), o);
+
+	return 1;
+}
+
+const struct Test * tTest (const void * _self) {
+	const struct Test * self = cast(Test(), _self);
+
+	return self;
+}
+
+static const int Test_cInt (int i, void * _self, void * _v, void * t, const void * o, va_list * app) {
+	struct TBaseClass * self = cast(TBaseClass(), _self);
+	struct TBaseClass * v = cast(TBaseClass(), _v);
+
+	return 2;
+}
+
+static void Test_C (void * _self) {
+	struct TBaseClass * self = cast(TBaseClass(), _self);
+
+}
+
+static const struct TBase * Test_dTBase (const void * _self) {
+	const struct Test * self = cast(Test(), _self);
+
+	return _self;
+}
+
+static void Test_D (void * _self) {
+	struct Test * self = cast(Test(), _self);
+
+}
+
+line -5
+line -4
+static const void * _Test;
+
+const void * Test (void) {
+	return _Test ? _Test :
+		(_Test = new(TBaseClass(),
+			"Test", TBase(), sizeof(struct Test),
+			cInt, "", Test_cInt,
+			C, "", Test_C,
+			dTBase, "dTBase", Test_dTBase,
+			D, "D", Test_D,
+			(void *) 0));
+}
+line -2
+line -1

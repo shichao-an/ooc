@@ -1,0 +1,162 @@
+#include <X11/StringDefs.h>
+#include <X11/Xaw/Label.h>
+#include <X11/Xaw/Command.h>
+#include <X11/Xaw/Box.h>
+#include <X11/Xaw/Form.h>
+
+#include "Ic.h"
+
+// Xt
+
+% Xt puto {
+	int result;
+%casts
+	result = super_puto(Xt(), self, fp);
+	return result + fprintf(fp, "widget %p\n", widget(self));
+}
+
+% Xt makeWidget {
+	void * parent = va_arg(* app, void *);
+	const char * name = va_arg(* app, const char *);
+%casts
+	if (! name || ! * name)
+		name = "widget";
+	widget(self) =
+		XtCreateManagedWidget(name, wc, widget(parent), NULL, 0);
+	return self;
+}
+
+% Xt addAllAccelerators {
+%casts
+	assert(widget(self));
+	XtInstallAllAccelerators(widget(self), widget(self));
+}
+
+% Xt setLabel {
+	Arg list;
+%casts
+	list.name = XtNlabel, list.value = (XtArgVal) text;
+	XtSetValues(widget(self), & list, 1);
+}
+
+% Xt addCallback {
+%casts
+	XtAddCallback(widget(self), XtNcallback, fun, data);
+}
+
+// XtApplicationShell
+
+% XtApplicationShell ctor {
+	struct XtApplicationShell * self
+				= super_ctor(XtApplicationShell(), _self, app);
+	int * argcp = va_arg(* app, int *);
+	char ** argv = va_arg(* app, char **);
+
+	widget(self) = XtAppInitialize(& self -> appContext, "Xapp",
+			NULL, 0,	// no options
+			argcp, argv,
+			NULL,		// no fallbacks
+			NULL, 0);	// no arguments
+	return self;
+}
+
+% XtApplicationShell mainLoop {
+%casts
+	XtRealizeWidget(widget(self));
+	XtAppMainLoop(self -> appContext);
+}
+
+// XawLabel
+
+% XawLabel ctor {
+	struct XawLabel * self = super_ctor(XawLabel(), _self, app);
+
+	makeWidget(self, labelWidgetClass, app);
+	return self;
+}
+
+// XawCommand
+
+% XawCommand ctor {
+	struct XawCommand * self = super_ctor(XawCommand(), _self, app);
+
+	makeWidget(self, commandWidgetClass, app);
+	return self;
+}
+
+// XawBox
+
+% XawBox ctor {
+	struct XawBox * self = super_ctor(XawBox(), _self, app);
+
+	makeWidget(self, boxWidgetClass, app);
+	return self;
+}
+
+// XawForm
+
+% XawForm ctor {
+	struct XawCommand * self = super_ctor(XawForm(), _self, app);
+
+	makeWidget(self, formWidgetClass, app);
+	return self;
+}
+
+// XLineOut
+
+% XLineOut ctor {	// new(XLineOut(), parent, "name", "text")
+	struct XLineOut * self =
+						super_ctor(XLineOut(), _self, app);
+	const char * text = va_arg(* app, const char *);
+
+	gate(self, text);
+	return self;
+}
+
+% XLineOut forward {
+%casts
+	if (selector == (Method) gate)
+	{	va_arg(* app, void *);
+		setLabel((void *) self, va_arg(* app, const void *));
+		* (enum react *) result = accept;
+	}
+	else
+		super_forward(XLineOut(), _self, result,
+									selector, name, app);
+}
+
+// XButton
+
+static void tell (Widget w, XtPointer client_data,
+									XtPointer call_data)
+{
+	gate(client_data, NULL);
+}
+
+% XButton ctor {	// new(XButton(), parent, "name", "text")
+	struct XButton * self = super_ctor(XButton(), _self, app);
+	const char * text = va_arg(* app, const char *);
+
+	self -> button = new(Button(), text);
+	setLabel(self, text);
+	addCallback(self, tell, self -> button);
+	return self;
+}
+
+% XButton puto {
+	int result;
+%casts
+	result = super_puto(XButton(), self, fp);
+	return result + puto(self -> button, fp);
+}
+
+% XButton forward {
+%casts
+	if (selector == wire)
+		wire(va_arg(* app, void *), self -> button);
+	else
+		super_forward(XButton(), _self, result,
+									selector, name, app);
+}
+
+%init

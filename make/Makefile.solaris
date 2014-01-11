@@ -1,0 +1,76 @@
+# OSTYPE=solaris	Solaris 5.8
+
+# SunOS holly 5.8 Generic_111433-01 sun4u sparc SUNW,Ultra-80
+
+# 01	sets bags
+# 02	strings atoms
+# 03	postfix value infix
+# 04	points circles
+# 05	value
+# 06	any points circles
+# 07	points circles queues stacks
+# 08	circles lists
+# 09	circles lists
+# 10	cmd wc sort
+# 11	value
+# 12	value
+# 13	except value
+# 14	hello button run cbutton crun ## xhello xbutton xrun
+
+AWK	= gawk#					'new' awk
+CC	= gcc -Wall -Wno-unused -g#		how to call the C compiler
+curses	= -lcurses#				how to link curses(3)
+debug	= #					how to track memory leaks
+host	= -dis unix:0#				how to get to the X11 host
+Lm	= -lm#					math functions
+# OOC	= ../ooc/ooc $(chapter)#		how to call the ooc script
+OOC	= ../ooc/ooc -DGNUC=1 $(chapter)#	... using const functions
+Rflag	= `if [ $* = Object ]; then echo -R; else :; fi`
+x11	= -lXaw -lXmu -lXext -lXt -lX11#	how to link X11
+
+# Rflag is used to hide ooc entirely behind implicit rules.
+# otherwise we need explicit rules for Object.[chr]
+# which backfire in the early chapters.
+
+# this rule uses the GNU C compiler and ooc to produce dependencies
+# from the C source file lists $c $m and from the class list $d.
+# the rule depends on the header file lists $h and $r to simplify
+# bootstrapping. the for-loop accounts for the fact that producing
+# foo.c from foo.dc depends on foo.d -- but ooc cannot deduce that.
+
+depend:	$h $r $c $m makefile
+	  > $@
+	- [ "$c$m" ] && $(CC) -MM $(CFLAGS) $c $m >> $@
+	- [ "$d" ] && $(OOC) -M $d >> $@
+	- [ "$d" ] && { d="$d"; for i in $$d; do echo $$i.c: $$i.d; done >> $@; }
+
+# this rule generates the dependencies of a library $l on its objects made
+# from the file list $c. this rule could be much smarter but at least
+# ESIX/make appears to be quite broken.
+
+makefile.etc:	makefile
+	for o in $(c:.c=); do \
+		echo '$$l:	'"$$o.o"; \
+		echo "$$o.o:	$$o.c"; \
+	done > $@
+
+# this rule inserts the objects $o into the library $l.
+# note that NeXTSTEP 3.1 ranlib apparently backdates the library, i.e.,
+# this rule may get executed a few times too many...
+
+mklib:	$(mklib)
+	$(AR) $(ARFLAGS) $l $o
+	ranlib $l
+.c.a:	;
+
+# these implicit rules produce header files from class description files
+# and C sources from class implementation files. in chapter 14 $(post) is
+# set to change the base class name from Object to Objct.
+
+.SUFFIXES:	.h .r .dc .d
+
+.d.h:	; $(OOC) $(Rflag) $(OOCFLAGS) $* -h $(post) > $@
+.d.r:	; $(OOC) $(Rflag) $(OOCFLAGS) $* -r $(post) > $@
+.dc.c:	; $(OOC) $(Rflag) $(OOCFLAGS) $* $*.dc $(post) > $@
+
+-include depend

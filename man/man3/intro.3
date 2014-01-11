@@ -1,0 +1,27 @@
+.\"	intro.3 -- 1.4 Sep 26 17:49:41 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH intro 3 "local: ats"
+.SH NAME
+intro \(em introduction to the root classes
+.SH SYNOPSIS
+.nf
+.ta 30n
+Object	Class
+    Exception
+.fi
+.SH DESCRIPTION
+.BR Object (3)
+is the root class;
+.BR Class (3)
+is the root metaclass.
+Most of the methods defined for
+.B Object
+are used in the standard reports for
+.IR ooc (1),
+i.e.,
+they cannot be changed without changing the reports.
+.PP
+.BR Exception (3)
+manages a stack of exception handlers.
+This class is not mandatory for working with
+.IR ooc .

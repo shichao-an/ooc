@@ -1,0 +1,132 @@
+
+
+
+Object(3)                                               Object(3)
+
+
+NAME
+       Class  Object -- root class
+
+SYNOPSIS
+       Object
+           Class
+       new(Object());
+       typedef void (* Method) ();
+       const void * classOf (const self)
+       size_t sizeOf (const self)
+       int isA (const self, const Class @ class)
+       int isOf (const self, const Class @ class)
+       void * cast (const Class @ class, const self)
+       Method respondsTo (const self, const char * tag)
+       %-
+       void * ctor (self, va_list * app)
+       void delete (self)
+       void * dtor (self)
+       int puto (const self, FILE * fp)
+       void * geto (self, FILE * fp)
+       void forward (self, void * result, Method selector, const char * name, ...)
+       %+
+       Object @ new (const self, ...)
+
+DESCRIPTION
+       Object is the root class; all classes and metaclasses have
+       Object as their  ultimate  superclass.   Metaclasses  have
+       Class as their penultimate superclass.
+
+       classOf returns the class description of an object; sizeOf
+       returns the size in bytes.
+
+       isA returns true if an object is described by  a  specific
+       class description, i.e., if it belongs to that class.  isA
+       is false for null pointers.   isOf  returns  true,  if  an
+       object  belongs  to a specific class or has it as a super-
+       class.  isOf is false for null pointers and true  for  any
+       object and the class Object.
+
+       cast  checks if its second argument is described, directly
+       or ultimately, by the first.  If not,  and  in  particular
+       for  null  pointers,  the  calling  program is terminated.
+       cast normally returns its second argument  unchanged;  for
+       efficiency, cast could be replaced by a macro.
+
+       respondsTo returns zero or a method selector corresponding
+       to a tag for some object.  If the result is not null,  the
+       object  with  other arguments as appropriate can be passed
+       to this selector.
+
+       ctor is the constructor.  It receives the additional argu-
+       ments  from  new.   It should first call super_ctor, which
+       may use up part of the argument list, and then handle  its
+       own initialization from the rest of the argument list.
+
+
+
+                            local: ats                          1
+
+
+
+
+
+Object(3)                                               Object(3)
+
+
+       Unless  overwritten,  delete destroys an object by calling
+       dtor and sending the result to free(3).  Null pointers may
+       not be passed to delete.
+
+       dtor  is  responsible for reclaiming resources acquired by
+       the object.  It will normally call super_dtor and  let  it
+       determine  its  result.   If  a  null pointer is returned,
+       delete will effectively not  reclaim  the  space  for  the
+       object.
+
+       puto  writes  an  ASCII  representation  of an object to a
+       stream.  It will normally call puto for the superclass  so
+       that the output starts with the class name.  The represen-
+       tation must be designed so that geto can retrieve all  but
+       the  class  name from the stream and place the information
+       into the area passed as first argument.  geto  works  just
+       like ctor and will normally let the superclass geto handle
+       the part written by the superclass puto.
+
+       forward is called by a selector if it cannot be applied to
+       an  object.  The method can be overwritten to forward mes-
+       sages.
+
+       Unless overwritten, new  calls  allocate  and  passes  the
+       result to ctor together with its remaining arguments.
+
+SEE ALSO
+       ooc(1), retrieve(2), Class(3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          2
+
+

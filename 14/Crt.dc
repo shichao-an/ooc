@@ -1,0 +1,191 @@
+#include <curses.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Crt
+
+% Crt ctor {
+	struct Crt * self = super_ctor(Crt(), _self, app);
+	static unsigned twice;
+
+	if (! twice ++)		// first access: setup for curses
+	{
+#if! defined SYSV && ! defined GNUDOS
+		int endwin (void);
+#endif
+		initscr(), atexit((void (*) (void)) endwin);
+		noecho(), cbreak();
+		signal(SIGINT, (void (*) (int)) exit);
+		refresh();
+	}
+	return self;
+}
+
+% Crt puto {
+	int result;
+%casts
+	result = super_puto(Crt(), self, fp);
+	return result + fprintf(fp, "window %p %d/%d\n",
+				self -> window, cols(self), rows(self));
+}
+
+% makeWindow {
+%casts
+	if ((self -> rows = rows))
+	{	self -> cols = cols;
+		self -> window = newwin(self -> rows, self -> cols, y, x);
+	}
+	else
+	{	self -> rows = LINES;
+		self -> cols = COLS;
+		self -> window = stdscr;
+	}
+	assert(self -> window);
+	wmove(self -> window, rows(self)/2, cols(self)/2);
+}
+
+% addStr {
+%casts
+	assert(self -> window);
+	werase(self -> window);
+	mvwaddstr(self -> window, y, x, s);
+	wrefresh(self -> window);	// naive...
+}
+
+% crtBox {
+%casts
+	assert(self -> window);
+	box(self -> window, '|', '-');
+	wrefresh(self -> window);	// naive...
+}
+
+% Crt gate {
+# define x v[0]
+# define y v[1]
+	int v[2];				// event data
+	static char buf [2];	// event string
+%casts
+	assert(self -> window);
+	getyx(((WINDOW *) self -> window), y, x);
+#if defined SYSV || defined GNUDOS
+	keypad(self -> window, TRUE);
+#endif
+	for (;;)
+	{	void * e;
+		int ch;
+
+		wmove(self -> window, y, x), wrefresh(self -> window);
+		switch (ch = wgetch(self -> window)) {
+		case EOF:
+		case 4:
+			return reject;
+		case '\n': case '\r':
+			e = new(Event(), 1, v);
+			break;
+		default:
+			buf[0] = ch;
+			e = new(Event(), 0, buf);
+			break;
+#ifdef KEY_LEFT
+		case KEY_LEFT:
+#else
+		case 'h':
+#endif
+			if (x > 0)
+				-- x;
+			continue;
+#ifdef KEY_DOWN
+		case KEY_DOWN:
+#else
+		case 'j':
+#endif
+			if (y < self -> rows-1)
+				++ y;
+			continue;
+#ifdef KEY_UP
+		case KEY_UP:
+#else
+		case 'k':
+#endif
+			if (y > 0)
+				-- y;
+			continue;
+#ifdef KEY_RIGHT
+		case KEY_RIGHT:
+#else
+		case 'l':
+#endif
+			if (x < self -> cols-1)
+				++ x;
+			continue;
+		}
+		super_gate(Crt(), self, e);
+		delete(e);
+	}
+# undef	x
+# undef	y
+}
+
+// CLineOut
+
+% CLineOut ctor {
+	struct CLineOut * self = super_ctor(CLineOut(), _self, app);
+	int y = va_arg(* app, int);
+	int x = va_arg(* app, int);
+	int len = va_arg(* app, int);
+
+	makeWindow(self, 1, len, y, x);
+	return self;
+}
+
+% CLineOut gate {
+%casts
+	addStr(self, 0, 0, item);
+	return accept;
+}
+
+// CButton
+
+% CButton ctor {	// new(CButton(), "text", row, col)
+	struct CButton * self = super_ctor(CButton(), _self, app);
+
+	self -> button =
+				new(Button(), va_arg(* app, const char *));
+	self -> y = va_arg(* app, int);
+	self -> x = va_arg(* app, int);
+
+	makeWindow(self, 3, strlen(text(self -> button)) + 4,
+						self -> y, self -> x);
+	addStr(self, 1, 2, text(self -> button));
+	crtBox(self);
+	return self;
+}
+
+% CButton puto {
+	int result;
+%casts
+	result = super_puto(CButton(), self, fp);
+	result += puto(self -> button, fp);
+	return result + fprintf(fp, "at %d/%d\n", self -> y, self -> x);
+}
+
+% CButton gate {
+%casts
+	if (kind(item) == 1)		// kind == 1 is click event
+	{	int * v = data(item);	// data is an array [x, y]
+
+		if (v[0] >= self -> x && v[0] < self -> x + cols(self)
+		&& v[1] >= self -> y && v[1] < self -> y + rows(self))
+			return gate(self -> button, 0);
+		return reject;
+	}
+	return gate(self -> button, item);
+}
+
+% CButton wire {
+%casts
+	wire(to, self -> button);
+}
+
+%init

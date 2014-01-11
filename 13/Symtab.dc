@@ -1,0 +1,164 @@
+#include <stdlib.h>
+#include <string.h>
+#include "binary.h"
+
+#include "Symbol.h"
+#include "Exception.h"
+
+% Symtab ctor {
+	struct Symtab * self = super_ctor(Symtab(), _self, app);
+
+	if (! (self -> dim = va_arg(* app, size_t)))
+		self -> dim = 1;
+
+	self -> buf = malloc(self -> dim * sizeof(void *));
+	assert(self -> buf);
+	return self;
+}
+
+% : Symtab puto {		// don't puto
+	return 0;
+}
+
+% : Symtab delete {		// don't delete
+}
+
+static int cmp (const void * _key, const void * _elt)
+{	const char * const * key = _key;
+	const void * const * elt = _elt;
+
+	return strcmp(* key, name(* elt));
+}
+
+static void ** search (struct Symtab * self, const char ** np)
+{
+	if (self -> count >= self -> dim)
+	{	self -> buf = realloc(self -> buf,
+						(self -> dim *= 2) * sizeof(void *));
+		assert(self -> buf);
+	}
+	return binary(np, self -> buf, & self -> count,
+										sizeof(void *), cmp);
+}
+
+% Symtab install {
+	const char * nm;
+	void ** pp;
+%casts
+	nm = name(entry);
+	pp = search(self, & nm);
+	if (* pp != nm)			// found entry
+		delete(* pp);
+	* pp = (void *) entry;
+}
+
+% Symtab screen {
+	void ** pp;
+%casts
+	pp = search(self, & name);
+	if (* pp == name)					// entered name
+	{	char * copy = malloc(strlen(name) + 1);
+
+		assert(copy);
+		* pp = new(Symbol(), strcpy(copy, name), lex);
+	}
+	return * pp;
+}
+
+% Symtab save {
+	const struct Symtab * self = cast(Symtab(), _self);
+	FILE * fp;
+
+	if (entry)						// one symbol
+	{	if (! respondsTo(entry, "move"))
+			return EOF;
+		if (! (fp = fopen(fnm, "w")))
+			return EOF;
+		puto(entry, fp);
+	}
+	else							// entire table
+	{	int i;
+
+		if (! (fp = fopen(fnm, "w")))
+			return EOF;
+		for (i = 0; i < self -> count; ++ i)
+			if (respondsTo(self -> buf[i], "move"))
+					puto(self -> buf[i], fp);
+	}
+
+	return fclose(fp);				// 0 or EOF
+}
+
+% Symtab load {
+	struct Symtab * self = cast(Symtab(), _self);
+	const char * target = NULL;
+	FILE * fp;
+	int result = EOF;
+	void * in;
+	void * cleanup;
+
+	if (entry) {
+		if (isOf(entry, Symbol())
+				|| respondsTo(entry, "move"))
+			target = name(entry);
+		else
+			return EOF;
+	}
+
+	if (! (fp = fopen(fnm, "r")))
+		return EOF;
+
+	cleanup = new(Exception());
+	if (catch(cleanup))
+	{	fclose(fp);
+		delete(cleanup);
+		cause(1);
+		assert(0);
+	}
+
+	while ((in = retrieve(fp)))
+	{	const char * nm;
+		void ** pp;
+
+		if (! respondsTo(in, "move"))
+			break;
+
+		if (target && strcmp(name(in), target))
+			continue;
+
+		nm = name(in);
+		pp = search(self, & nm);
+
+		if (* pp == nm)				// not yet in table
+			* pp = in;
+
+		else if (isA(* pp, Symbol()))
+									// not yet defined
+		{	nm = name(* pp), delete(* pp), free((void *) nm);
+			* pp = in;
+		}		// might free target, but then we exit below
+
+		else if (! respondsTo(* pp, "move"))
+		{	nm = name(in); delete(in); free((void *) nm);
+			continue;				// should not happen
+		}
+
+		else
+		{	move(* pp, in);
+			delete(in), free((void *) nm);
+		}
+
+		if (target)
+		{	result = 0;
+			break;
+		}
+	}
+	if (! target && feof(fp))
+		result = 0;
+
+	fclose(fp);
+	delete(cleanup);
+	return result;
+}
+
+%init

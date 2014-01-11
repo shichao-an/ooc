@@ -1,0 +1,239 @@
+#include "parse.h"
+#include "Symbol.h"
+
+static void * nodes;		// chains all nodes
+
+% Node new {
+	struct Node * result =
+				cast(Node(), super_new(Node(), _self, app));
+
+	result -> next = nodes, nodes = result;
+	return (void *) result;
+}
+
+% Node sunder {
+%casts
+	if (nodes == self)				// first node
+		nodes = self -> next;
+	else if (nodes)					// other node
+	{	struct Node * np = nodes;
+
+		while (np -> next && np -> next != self)
+			np = np -> next;
+
+		// if this is called by delete() for a Fun expression
+		// the node has been detached when the expression was
+		// sent to setfun() by the parser, therefore, the node
+		// need not be on the chain...
+
+		if (np -> next)
+			np -> next = self -> next;
+	}
+	self -> next = 0;
+}
+
+% Node delete {
+%casts
+	sunder(self);
+	super_delete(Node(), self);
+}
+
+% Node reclaim {
+%casts
+	while (nodes)
+		how(nodes);
+}
+
+% Number ctor {
+	struct Number * self = super_ctor(Number(), _self, app);
+
+	self -> value = va_arg(* app, double);
+	return self;
+}
+
+% Number puto {
+	int result;
+%casts
+	result = super_puto(Number(), self, fp);
+	return result + fprintf(fp, "\tvalue %g\n", self -> value);
+}
+
+% Number geto {
+	struct Number * self = super_geto(Number(), _self, fp);
+
+	if (fscanf(fp, "\tvalue %lg\n", & self -> value) != 1)
+		assert(0);
+	return self;
+}
+
+% Number exec {
+%casts
+	return self -> value;
+}
+
+% Monad ctor {
+	struct Monad * self = super_ctor(Monad(), _self, app);
+
+	self -> down = va_arg(* app, void *);
+	return self;
+}
+
+% Val puto {
+	int result;
+%casts
+	result = super_puto(Val(), self, fp);
+	return result + putsymbol(down(self), fp);
+}
+
+% Val exec {
+%casts
+	return value(down(self));
+}
+
+% Global geto {
+	struct Global * self = super_geto(Global(), _self, fp);
+
+	down(self) = getsymbol(Var(), fp);
+	return self;
+}
+
+% Parm geto {
+	struct Parm * self = super_geto(Parm(), _self, fp);
+
+	down(self) = getsymbol(Fun(), fp);
+	return self;
+}
+
+% Unary dtor {
+%casts
+	delete(down(self));
+	return super_dtor(Unary(), self);
+}
+
+% Unary puto {
+	int result;
+%casts
+	result = super_puto(Unary(), self, fp);
+	return result + puto(down(self), fp);
+}
+
+% Unary geto {
+	struct Unary * self = super_geto(Unary(), _self, fp);
+
+	down(self) = cast(Node(), retrieve(fp));
+	return self;
+}
+
+% Minus exec {
+%casts
+	return - exec(down(self));
+}
+
+% Dyad ctor {
+	struct Dyad * self = super_ctor(Dyad(), _self, app);
+
+	self -> left = va_arg(* app, void *);
+	self -> right = va_arg(* app, void *);
+	return self;
+}
+
+% Ref dtor {
+%casts
+	delete(right(self));
+	return super_dtor(Ref(), self);
+}
+
+% Ref puto {
+	int result;
+%casts
+	result = super_puto(Ref(), self, fp);
+	result += putsymbol(left(self), fp);
+	return result + puto(right(self), fp);
+}
+
+% Assign geto {
+	struct Assign * self = super_geto(Assign(), _self, fp);
+
+	left(self) = getsymbol(Var(), fp);
+	right(self) = cast(Node(), retrieve(fp));
+	return self;
+}
+
+% Assign exec {
+%casts
+	return setvalue(left(self), exec(right(self)));
+}
+
+% Builtin geto {
+	struct Builtin * self = super_geto(Builtin(), _self, fp);
+
+	left(self) = getsymbol(Math(), fp);
+	right(self) = cast(Node(), retrieve(fp));
+	return self;
+}
+
+% Builtin exec {
+%casts
+	return mathvalue(left(self), exec(right(self)));
+}
+
+% User geto {
+	struct User * self = super_geto(User(), _self, fp);
+
+	left(self) = getsymbol(Fun(), fp);
+	right(self) = cast(Node(), retrieve(fp));
+	return self;
+}
+
+% User exec {
+%casts
+	return funvalue(left(self), exec(right(self)));
+}
+
+% Binary dtor {
+%casts
+	delete(left(self));
+	delete(right(self));
+	return super_dtor(Binary(), self);
+}
+
+% Binary puto {
+	int result;
+%casts
+	result = super_puto(Binary(), self, fp);
+	result += puto(left(self), fp);
+	return result + puto(right(self), fp);
+}
+
+% Binary geto {
+	struct Binary * self = super_geto(Binary(), _self, fp);
+
+	left(self) = cast(Node(), retrieve(fp));
+	right(self) = cast(Node(), retrieve(fp));
+	return self;
+}
+
+% Add exec {
+%casts
+	return exec(left(self)) + exec(right(self));
+}
+
+% Sub exec {
+%casts
+	return exec(left(self)) - exec(right(self));
+}
+
+% Mult exec {
+%casts
+	return exec(left(self)) * exec(right(self));
+}
+
+% Div exec {
+	double x;
+%casts
+	if ((x = exec(right(self))) == 0.0)
+		error("division by zero");
+	return exec(left(self)) / x;
+}
+
+%init

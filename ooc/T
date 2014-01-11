@@ -1,0 +1,258 @@
+//
+//
+
+% T s { // void s (void * _self)
+%casts
+
+}
+
+% T S { // void S (void * _self)
+%casts
+
+}
+
+% T ctor { // void * ctor (void * _self, va_list * app)
+%casts
+
+	return (void *) 0;
+}
+
+% T D { // void D (void * _self)
+%casts
+
+}
+
+% T c { // void c (void * _self)
+%casts
+
+}
+
+% T C { // void C (void * _self)
+%casts
+
+}
+
+%init
+# ifndef T_h
+# define T_h
+
+line 1			root and meta root class
+line 2
+
+extern const void * T (void);
+
+void s (void * _self);
+void S (void * _self);
+
+void * ctor (void * _self, va_list * app);
+void D (void * _self);
+
+void c (void * _self);
+void C (void * _self);
+
+extern const void * Class (void);
+
+void cc (void * _self);
+void CC (void * _self);
+
+line -2
+line -1
+
+# endif
+# ifndef T_r
+# define T_r
+
+struct T {
+	const void * class;
+};
+
+struct Class { struct T _;
+	const char * name;
+	const void * super;
+	size_t size;
+
+	struct Method ctor;
+	struct Method D;
+	struct Method c;
+	struct Method C;
+};
+
+void * super_ctor (const void * _class, void * _self, va_list * app);
+void super_D (const void * _class, void * _self);
+
+void super_c (const void * _class, void * _self);
+void super_C (const void * _class, void * _self);
+
+# endif
+# include "T.h"
+# include "T.r"
+
+void s (void * _self) {
+	struct T * self = cast(T(), _self);
+
+}
+
+void S (void * _self) {
+	struct T * self = cast(T(), _self);
+
+}
+
+static void T_c (void * _self) {
+}
+
+static void T_C (void * _self) {
+}
+
+static void * T_ctor (void * _self, va_list * app) {
+
+	return _self;
+}
+
+static void T_D (void * _self) {
+}
+
+void cc (void * _self) {
+	struct Class * self = cast(Class(), _self);
+
+}
+
+void CC (void * _self) {
+	struct Class * self = cast(Class(), _self);
+
+}
+
+void * ctor (void * _self, va_list * app) {
+	void * result;
+	const struct Class * class = classOf(_self);
+
+	if (class -> ctor.method) {
+
+		result = ((void * (*) ()) class -> ctor.method)(_self, app);
+	} else
+		forward(_self, & result, (Method) ctor, "ctor", _self, app);
+	return result;
+}
+
+void * super_ctor (const void * _class, void * _self, va_list * app) {
+	const struct Class * superclass = super(_class);
+
+	assert(superclass -> ctor.method);
+	return ((void * (*) ()) superclass -> ctor.method)(_self, app);
+}
+
+void D (void * _self) {
+	const struct Class * class = classOf(_self);
+
+	if (class -> D.method) {
+
+		((void (*) ()) class -> D.method)(_self);
+	} else
+		forward(_self, 0, (Method) D, "D", _self);
+}
+
+void super_D (const void * _class, void * _self) {
+	const struct Class * superclass = super(_class);
+
+	assert(superclass -> D.method);
+	((void (*) ()) superclass -> D.method)(_self);
+}
+
+void c (void * _self) {
+	const struct Class * class = cast(Class(), _self);
+
+	if (class -> c.method) {
+
+		((void (*) ()) class -> c.method)(_self);
+	} else
+		forward(_self, 0, (Method) c, "c", _self);
+}
+
+void super_c (const void * _class, void * _self) {
+	const struct Class * superclass = super(_class);
+
+	assert(superclass -> c.method);
+	((void (*) ()) superclass -> c.method)(_self);
+}
+
+void C (void * _self) {
+	const struct Class * class = cast(Class(), _self);
+
+	if (class -> C.method) {
+
+		((void (*) ()) class -> C.method)(_self);
+	} else
+		forward(_self, 0, (Method) C, "C", _self);
+}
+
+void super_C (const void * _class, void * _self) {
+	const struct Class * superclass = super(_class);
+
+	assert(superclass -> C.method);
+	((void (*) ()) superclass -> C.method)(_self);
+}
+
+static void * Class_ctor (void * _self, va_list * app) {
+	struct Class * self = _self;
+	const size_t offset = offsetof(struct Class, ctor);
+	Method selector;
+	va_list ap;
+
+	self -> name = va_arg(* app, char *);
+	self -> super = cast(Class(), va_arg(* app, void *));
+	self -> size = va_arg(* app, size_t);
+
+	memcpy((char *) self + offset, (char *) self -> super + offset,
+		sizeOf(self -> super) - offset);
+
+#ifdef va_copy
+	va_copy(ap, * app);
+#else
+	ap = * app;
+#endif
+	while ((selector = va_arg(ap, Method)))
+	{	const char * tag = va_arg(ap, const char *);
+		Method method = va_arg(ap, Method);
+
+		if (selector == (Method) ctor)
+		{	if (tag)
+				self -> ctor.tag = tag,
+				self -> ctor.selector = selector;
+			self -> ctor.method = method;
+			continue;
+		}
+		if (selector == (Method) D)
+		{	if (tag)
+				self -> D.tag = tag,
+				self -> D.selector = selector;
+			self -> D.method = method;
+			continue;
+		}
+		if (selector == (Method) c)
+		{	if (tag)
+				self -> c.tag = tag,
+				self -> c.selector = selector;
+			self -> c.method = method;
+			continue;
+		}
+		if (selector == (Method) C)
+		{	if (tag)
+				self -> C.tag = tag,
+				self -> C.selector = selector;
+			self -> C.method = method;
+			continue;
+		}
+	}
+#ifdef va_copy
+	va_end(ap);
+#endif
+	return self;
+}
+
+const void * T (void) {
+	return & _T;
+}
+
+const void * Class (void) {
+	return & _Class;
+}
+

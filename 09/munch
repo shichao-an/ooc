@@ -1,0 +1,56 @@
+#! /usr/local/gnu/bin/gawk -f
+
+# nm -p object archive image ... | gawk -f munch
+# produces a class list
+
+# System V
+#   nm -p produces lines
+#	1234567890 d _Class	the static pointer
+#	1234567890 T Class	the function
+
+# Solaris
+#   nm -p produces lines
+#	1234567890 b _Class	the static pointer
+#	1234567890 d _Class	the statically initialized structure
+#	1234567890 T Class	the function
+
+# Berkeley
+#   nm -p produces symbol table ordered lines
+#	1234abcd s __Class	the statically initialized structure
+#	1234abcd b __Class	the static pointer
+#	1234abcd T _Class	the function
+
+# MacOS X 64-bit
+#   like Berkeley but with 16 hex digits
+
+# old awk appears to fail if a vector has never been stored into
+
+NF != 3 || $1 !~ /^[0-9a-f]+$/		{ next }
+length($1) == 10 && $2 ~ /^[bd]$/	{ sysv[$3] = 1; next }
+$2 ~ /^[bs]$/				{ bsd[$3] = 1; next }
+$2 == "T"				{ T[$3] = 1; next }
+
+END {
+	for (name in T)
+		if ("_" name in bsd)		# eliminate leading _
+			names[n ++] = substr(name, 2)
+		else if ("_" name in sysv)
+			names[n ++] = name
+						# shellsort()
+	for (gap = int(n/2); gap > 0; gap = int(gap/2))
+		for (i = gap; i < n; ++ i)
+			for (j = i-gap; j >= 0 && \
+				 	names[j] > names[j+gap]; j -= gap)
+			{	name = names[j]
+				names[j] = names[j+gap]
+				names[j+gap] = name
+			}
+
+	for (i = 0; i < n; ++ i)
+		printf "extern const void * %s (void);\n", names[i]
+
+	print "\nconst void * (* classes [])(void) = {"
+	for (i = 0; i < n; ++ i)
+		printf "\t%s,\n", names[i]
+	print "0 };"
+}

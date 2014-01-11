@@ -1,0 +1,21 @@
+% -dc			// implement -dc option
+
+/ ` / `n
+/ ` / `n `n
+
+`{% `%thunk `}
+
+`{super
+  `{%- `%thunk `}
+  `{%+ `%thunk `}
+`}super
+
+` %init `n
+
+% thunk			// suggest one method
+
+` %  `desc  `method  {  / ` /  `%header `n
+` %casts `n `n
+
+	`{ifnot `result void `t return  ( `result )  0; `}n
+} `n `n

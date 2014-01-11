@@ -1,0 +1,145 @@
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define	MAGIC	0x0effaced	// magic number for objects
+// efface: to make (oneself) modestly or shyly inconspicuous
+
+//	Object
+
+% Object ctor {
+	return _self;
+}
+
+% Object dtor {
+	return _self;
+}
+
+% Object differ {
+	return _self != b;
+}
+
+% Object puto {
+	const struct Class * class = classOf(_self);
+
+	return fprintf(fp, "%s at %p\n", class -> name, _self);
+}
+
+% delete {
+	if (_self)
+		free(dtor(_self));
+}
+
+% classOf {
+%casts
+	return self -> class;
+}
+
+% sizeOf {
+	const struct Class * class = classOf(_self);
+
+	return class -> size;
+}
+
+% isA {
+	return _self && classOf(_self) == class;
+}
+
+% isOf {
+	if (_self)
+	{	const struct Class * myClass = classOf(_self);
+
+		if (class != Object) {
+			while (myClass != class)
+				if (myClass != Object)
+					myClass = super(myClass);
+				else
+					return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+static void catch (int sig)		// signal handler: bad pointer
+{
+	assert(sig == 0);		// bad pointer, should not happen
+}
+
+#define	isObject(p) \
+		( assert(p), \
+		assert(((struct Object *) p) -> magic == MAGIC), p )
+
+% cast {
+	void (* sigsegv)(int) = signal(SIGSEGV, catch);
+#ifdef	SIGBUS
+	void (* sigbus)(int) = signal(SIGBUS, catch);
+#endif
+	const struct Object * self = isObject(_self);
+	const struct Class * myClass = isObject(self -> class);
+
+	if (class != Object)
+	{	isObject(class);
+		while (myClass != class)
+		{	assert(myClass != Object);	// illegal cast
+			myClass = myClass -> super;
+		}
+	}
+
+#ifdef	SIGBUS
+	signal(SIGBUS, sigbus);
+#endif
+	signal(SIGSEGV, sigsegv);
+	return (void *) self;
+}
+
+//	Class
+
+% Class dtor {
+%casts
+	fprintf(stderr, "%s: cannot destroy class\n", self -> name);
+	return 0;
+}
+
+% new {
+	struct Object * object;
+	va_list ap;
+%casts
+	assert(self -> size);
+	object = calloc(1, self -> size);
+	assert(object);
+	object -> magic = MAGIC;
+	object -> class = self;
+	va_start(ap, _self);
+	object = ctor(object, & ap);
+	va_end(ap);
+	return object;
+}
+
+% super {
+%casts
+	return self -> super;
+}
+
+//	initialization
+//    _Class and _Object are statically initialized structures
+
+static const struct Class _Object;
+static const struct Class _Class;
+
+%init
+
+static const struct Class _Object = {
+	{ MAGIC, & _Class },
+	"Object", & _Object, sizeof(struct Object),
+	Object_ctor, Object_dtor, Object_differ, Object_puto
+};
+
+static const struct Class _Class = {
+	{ MAGIC, & _Class },
+	"Class", & _Object, sizeof(struct Class),
+	Class_ctor, Class_dtor, Object_differ, Object_puto
+};
+
+const void * Object = & _Object;
+const void * Class = & _Class;

@@ -1,0 +1,66 @@
+
+
+
+intro(3)                                                 intro(3)
+
+
+NAME
+       intro -- introduction to the root classes
+
+SYNOPSIS
+       Object                        Class
+           Exception
+
+DESCRIPTION
+       Object(3)  is  the  root class; Class(3) is the root meta-
+       class.  Most of the methods defined for Object are used in
+       the  standard  reports  for  ooc(1),  i.e., they cannot be
+       changed without changing the reports.
+
+       Exception(3) manages a stack of exception handlers.   This
+       class is not mandatory for working with ooc.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          1
+
+

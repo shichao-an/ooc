@@ -1,0 +1,5 @@
+new.o : new.h new.r 
+Point.o : Point.h Point.r new.h new.r 
+Circle.o : Circle.h Point.h Circle.r Point.r new.h new.r 
+points.o : Point.h new.h 
+circles.o : Circle.h Point.h new.h 

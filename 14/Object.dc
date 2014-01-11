@@ -1,0 +1,186 @@
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+
+//	Object
+
+% Object new {
+%casts
+	return ctor(allocate(self), app);
+}
+
+% Object ctor {
+%casts
+	return self;
+}
+
+% Object dtor {
+%casts
+	return self;
+}
+
+% Object puto {
+	const struct Class * class;
+%casts
+	class = classOf(self);
+	return fprintf(fp, "%s at %p\n", class -> name, self);
+}
+
+% Object delete {
+%casts
+	free(dtor(self));
+}
+
+
+% Object forward {
+%casts
+	fprintf(stderr, "%s at %p does not answer %s\n",
+						nameOf(classOf(self)), self, name);
+	assert(0);
+}
+% classOf {
+%casts
+	return self -> class;
+}
+
+% sizeOf {
+	const struct Class * class = classOf(_self);
+
+	return class -> size;
+}
+
+% isA {
+	if (_self) {
+%casts
+		return classOf(self) == class;
+	}
+	return 0;
+}
+
+% isOf {
+	if (_self)
+	{	const struct Class * myClass;
+%casts
+		myClass = classOf(self);
+		if (class != Object()) {
+			while (myClass != class)
+				if (myClass != Object())
+					myClass = super(myClass);
+				else
+					return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
+static void catch (int sig)		// signal handler: bad pointer
+{
+	assert(sig == 0);		// bad pointer, should not happen
+}
+
+#define	isObject(p) \
+		( assert(p), \
+		assert(((struct Object *) p) -> magic == MAGIC), p )
+
+% cast {
+	void (* sigsegv)(int) = signal(SIGSEGV, catch);
+#ifdef	SIGBUS
+	void (* sigbus)(int) = signal(SIGBUS, catch);
+#endif
+	const struct Object * self = isObject(_self);
+	const struct Class * myClass = isObject(self -> class);
+
+	if (class != Object())
+	{	isObject(class);
+		while (myClass != class)
+		{	assert(myClass != Object());	// illegal cast
+			myClass = myClass -> super;
+		}
+	}
+
+#ifdef	SIGBUS
+	signal(SIGBUS, sigbus);
+#endif
+	signal(SIGSEGV, sigsegv);
+	return (void *) self;
+}
+
+% respondsTo {
+	if (tag && * tag) {
+		const struct Class * class = classOf(_self);
+		const struct Method * p = & class -> ctor; // first
+		int nmeth =
+			(sizeOf(class) - offsetof(struct Class, ctor))
+			/ sizeof(struct Method);	// # of Methods
+
+		do
+			if (p -> tag && strcmp(p -> tag, tag) == 0)
+				return p -> method ? p -> selector : 0;
+		while (++ p, -- nmeth);
+	}
+	return 0;
+}
+
+//	Class
+
+% Class dtor {
+	assert(0);
+	return 0;
+}
+
+% Class delete {
+%casts
+	fprintf(stderr, "%s: cannot delete class\n", self -> name);
+}
+
+% allocate {
+	struct Object * object;
+%casts
+	assert(self -> size);
+	object = calloc(1, self -> size);
+	assert(object);
+	object -> magic = MAGIC;
+	object -> class = self;
+	return object;
+}
+
+% super {
+%casts
+	return self -> super;
+}
+
+% nameOf {
+%casts
+	return self -> name;
+}
+
+//	initialization
+//    _Class and _Object are statically initialized structures
+
+static const struct Class _Object;
+static const struct Class _Class;
+
+%init
+
+static const struct Class _Object = {
+	{ MAGIC, & _Class },
+	"Object", & _Object, sizeof(struct Object),
+	{ "",		(Method) 0,		(Method) Object_ctor },
+	{ "",		(Method) 0,		(Method) Object_dtor },
+	{ "puto",	(Method) puto,	(Method) Object_puto },
+	{ "delete",	(Method) delete,(Method) Object_delete },
+	{ "forward",(Method) forward,(Method) Object_forward },
+	{ "",		(Method) 0,		(Method) Object_new },
+};
+
+static const struct Class _Class = {
+	{ MAGIC, & _Class },
+	"Class", & _Object, sizeof(struct Class),
+	{ "",		(Method) 0,		(Method) Class_ctor },
+	{ "",		(Method) 0,		(Method) Class_dtor },
+	{ "puto",	(Method) puto,	(Method) Object_puto },
+	{ "delete",	(Method) delete,(Method) Class_delete },
+	{ "forward",(Method) forward,(Method) Object_forward },
+	{ "",		(Method) 0,		(Method) Object_new },
+};

@@ -1,0 +1,213 @@
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "List.h"
+
+// Ic
+
+% Ic puto {
+	int result;
+%casts
+	result = super_puto(Ic(), self, fp);
+	result += fputs("wired to ", fp);
+	if (! self -> out)
+		return result + fputs("[nil]\n", fp);
+	return result + puto(self -> out, fp);
+}
+
+% Ic wire {
+%casts
+	self -> out = to;
+}
+
+% Ic gate {
+%casts
+	return self -> out ? gate(self -> out, item) : reject;
+}
+
+// Mux
+
+% Mux ctor {
+%casts
+	self -> list = new(List(), 1);
+	return self;
+}
+
+% Mux dtor {
+%casts
+	delete(self -> list), self -> list = 0;
+	return super_dtor(Mux(), self);
+}
+
+% Mux puto {
+	int result;
+%casts
+	result = super_puto(Mux(), self, fp);
+	result += fputs("list ", fp);
+	return result + puto(self -> list, fp);
+}
+
+% Mux wire {			// add another receiver
+%casts
+	addLast(self -> list, to);
+}
+
+% Mux gate {			// sends to first responder
+	unsigned i, n;
+	enum react result = reject;
+%casts
+	n = count(self -> list);
+	for (i = 0; i < n; ++ i)
+	{	result = gate(lookAt(self -> list, i), item);
+		if (result == accept)
+			break;
+	}
+	return result;
+}
+
+// LineOut
+
+% LineOut gate {
+%casts
+	assert(item);
+	puts(item);		// hopefully, it is a string
+	return accept;
+}
+
+// Button
+
+% Button ctor {		// new(Button(), "text")
+	struct Button * self = super_ctor(Button(), _self, app);
+
+	self -> text = va_arg(* app, const char *);
+	return self;
+}
+
+% Button puto {
+	int result;
+%casts
+	result = super_puto(Button(), self, fp);
+	return result + fprintf(fp, "text \"%s\"\n", self -> text);
+}
+
+% Button gate {
+%casts
+	if (item && kind(item) == 0
+				&& strcmp(data(item), self -> text))
+		return reject;
+	return super_gate(Button(), self, self -> text);
+}
+
+// Event
+
+% Event ctor {	// new(Event(), 0, "text") etc.
+	struct Event * self = super_ctor(Event(), _self, app);
+
+	self -> kind = va_arg(* app, int);
+	self -> data = va_arg(* app, void *);
+	return self;
+}
+
+% Event puto {
+	int result;
+%casts
+	result = super_puto(Event(), self, fp);
+	result += fprintf(fp, "kind %d, data ", self -> kind);
+	return result + fprintf(fp, self -> kind ? "%p\n" : "\"%s\"\n",
+					self -> data);
+}
+
+% Event kind {
+%casts
+	return self -> kind;
+}
+
+% Event data {
+%casts
+	return self -> data;
+}
+
+// Calc
+
+% Calc puto {
+	int result;
+%casts
+	result = super_puto(Calc(), self, fp);
+	return result + fprintf(fp, "state %d, op '%c', value[] %d, %d\n",
+		self -> state,
+		self -> op ? self -> op : ' ',
+		self -> value[0], self -> value[1]);
+}
+
+static char * itoa (int value)			// static result...
+{	static char buf [3 * sizeof value + 2];
+
+	sprintf(buf, "%d", value);
+	return buf;
+}
+
+static void cpu (struct Calc * self)	// if possible, value[0] op= value[1]
+{
+	if (self -> state)
+		switch (self -> op) {
+		case '+':
+			self -> value[0] += self -> value[1];
+			break;
+		case '-':
+			self -> value[0] -= self -> value[1];
+			break;
+		case '*':
+			self -> value[0] *= self -> value[1];
+			break;
+		case '/':
+			if (self -> value[1])
+				self -> value[0] /= self -> value[1];
+			else
+				self -> value[0] |= ~0U >> 1;
+		}
+}
+
+% Calc gate {
+%casts
+	const char * text = item;		// assuming character string
+
+	switch (text[0]) {
+	case 'Q':						// quit
+		exit(0);
+	default:
+		if (isdigit(text[0] & 0xff))		// make number
+		{	self -> value[self -> state] *= 10;
+			self -> value[self -> state] += text[0] - '0';
+			super_gate(Calc(), self,
+				itoa(self -> value[self -> state]));
+		}
+		break;
+	case '+':						// add
+	case '-':						// subtract
+	case '*':						// multiply
+	case '/':						// divide
+		cpu(self);					// compute previous result
+		if (self -> state)			// send it
+			super_gate(Calc(), self, itoa(self -> value[0]));
+		else						// or change state
+			self -> state = 1;		// either way, new state is 1
+		self -> value[1] = 0;		// clear its value
+		self -> op = text[0];		// remember operator
+		break;
+	case 'C':						// clear
+		if (! self -> state)		// in state 0: clear all
+			super_gate(Calc(), self, " ");
+		else						// in state 1: clear entry
+			super_gate(Calc(), self, "0");
+		self -> value[self -> state] = 0;
+		break;
+	case '=':						// total
+		cpu(self);					// compute previous result
+		super_gate(Calc(), self, itoa(self -> value[0])); // and send it
+		self -> state = 0, self -> value[0] = 0; // reset
+	}
+	return accept;
+}
+
+%init

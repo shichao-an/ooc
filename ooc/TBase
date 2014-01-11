@@ -1,0 +1,317 @@
+TBase.d: T.d
+//
+//
+
+% TBase sInt { // int sInt (int i, void * _self, void * _v, void * t, const void * o, ...)
+%casts
+
+	return (int) 0;
+}
+
+% TBase sTBase { // const struct TBase * sTBase (const void * _self)
+%casts
+
+	return (const struct TBase *) 0;
+}
+
+% TBase dVoid { // void dVoid (int i, void * _self, void * _v, void * t, const void * o, ...)
+%casts
+
+}
+
+% TBase dTBase { // const struct TBase * dTBase (const void * _self)
+%casts
+
+	return (const struct TBase *) 0;
+}
+
+% TBase cInt { // const int cInt (int i, void * _self, void * _v, void * t, const void * o, ...)
+%casts
+
+	return (const int) 0;
+}
+
+% TBase cVoid { // void cVoid (const void * _self)
+%casts
+
+}
+
+% TBase ctor { // void * ctor (void * _self, va_list * app)
+%casts
+
+	return (void *) 0;
+}
+
+% TBase D { // void D (void * _self)
+%casts
+
+}
+
+% TBase c { // void c (void * _self)
+%casts
+
+}
+
+% TBase C { // void C (void * _self)
+%casts
+
+}
+
+%init
+# ifndef TBase_h
+# define TBase_h
+
+# include "T.h"
+
+line 1			class with new meta class
+line 2
+
+extern const void * TBase (void);
+
+int sInt (int i, void * _self, void * _v, void * t, const void * o, ...);
+const struct TBase * sTBase (const void * _self);
+
+void dVoid (int i, void * _self, void * _v, void * t, const void * o, ...);
+const struct TBase * dTBase (const void * _self);
+
+extern const void * TBaseClass (void);
+
+const int cInt (int i, void * _self, void * _v, void * t, const void * o, ...);
+void cVoid (const void * _self);
+
+line -2
+line -1
+
+# endif
+# ifndef TBase_r
+# define TBase_r
+
+# include "T.r"
+
+struct TBase { const struct T _;
+	void * line4;
+	int line5;
+};
+
+struct TBaseClass { const struct Class _;
+	struct Method dVoid;
+	struct Method dTBase;
+	struct Method cInt;
+	struct Method cVoid;
+};
+
+void super_dVoid (const void * _class, int i, void * _self, void * _v, void * t, const void * o, va_list * app);
+const struct TBase * super_dTBase (const void * _class, const void * _self);
+
+const int super_cInt (const void * _class, int i, void * _self, void * _v, void * t, const void * o, va_list * app);
+void super_cVoid (const void * _class, const void * _self);
+
+# endif
+# include "TBase.h"
+# include "TBase.r"
+
+line 1			implementation of class with new meta class
+line 2
+
+int sInt (int i, void * _self, void * _v, void * t, const void * o, ...) {
+	struct TBase * self = cast(TBase(), _self);
+	struct TBase * v = cast(TBase(), _v);
+
+	cast(TBase(), t);
+	cast(Object(), o);
+
+	return 1;
+}
+
+const struct TBase * sTBase (const void * _self) {
+	const struct TBase * self = cast(TBase(), _self);
+
+	return self;
+}
+
+static const int TBase_cInt (int i, void * _self, void * _v, void * t, const void * o, va_list * app) {
+	struct TBaseClass * self = cast(TBaseClass(), _self);
+	struct TBaseClass * v = cast(TBaseClass(), _v);
+
+	return 2;
+}
+
+static void TBase_cVoid (const void * _self) {
+	const struct TBaseClass * self = cast(TBaseClass(), _self);
+
+}
+
+static void TBase_dVoid (int i, void * _self, void * _v, void * t, const void * o, va_list * app) {
+	struct TBase * self = cast(TBase(), _self);
+	struct TBase * v = cast(TBase(), _v);
+
+}
+
+static const struct TBase * TBase_dTBase (const void * _self) {
+	const struct TBase * self = cast(TBase(), _self);
+
+	return _self;
+}
+
+line -5
+line -4
+void dVoid (int i, void * _self, void * _v, void * t, const void * o, ...) {
+	va_list ap;
+	const struct TBaseClass * class = (const void *) classOf(_self);
+
+	va_start(ap, o);
+	if (isOf(class, TBaseClass()) && class -> dVoid.method) {
+	cast(TBase(), t);
+	cast(Object(), o);
+
+		((void (*) ()) class -> dVoid.method)(i, _self, _v, t, o, & ap);
+	} else
+		forward(_self, 0, (Method) dVoid, "dVoid", i, _self, _v, t, o, & ap);
+	va_end(ap);
+}
+
+void super_dVoid (const void * _class, int i, void * _self, void * _v, void * t, const void * o, va_list * app) {
+	const struct TBaseClass * superclass = cast(TBaseClass(), super(_class));
+
+	cast(TBase(), t);
+	cast(Object(), o);
+
+	assert(superclass -> dVoid.method);
+	((void (*) ()) superclass -> dVoid.method)(i, _self, _v, t, o, app);
+}
+
+const struct TBase * dTBase (const void * _self) {
+	const struct TBase * result;
+	const struct TBaseClass * class = (const void *) classOf(_self);
+
+	if (isOf(class, TBaseClass()) && class -> dTBase.method) {
+
+		result = ((const struct TBase * (*) ()) class -> dTBase.method)(_self);
+	} else
+		forward(_self, & result, (Method) dTBase, "dTBase", _self);
+	return result;
+}
+
+const struct TBase * super_dTBase (const void * _class, const void * _self) {
+	const struct TBaseClass * superclass = cast(TBaseClass(), super(_class));
+
+	assert(superclass -> dTBase.method);
+	return ((const struct TBase * (*) ()) superclass -> dTBase.method)(_self);
+}
+
+const int cInt (int i, void * _self, void * _v, void * t, const void * o, ...) {
+	const int result;
+	va_list ap;
+	const struct TBaseClass * class = cast(Class(), _self);
+
+	va_start(ap, o);
+	if (isOf(class, TBaseClass()) && class -> cInt.method) {
+	cast(TBase(), t);
+	cast(Object(), o);
+
+		result = ((const int (*) ()) class -> cInt.method)(i, _self, _v, t, o, & ap);
+	} else
+		forward(_self, & result, (Method) cInt, "cInt", i, _self, _v, t, o, & ap);
+	va_end(ap);
+	return result;
+}
+
+const int super_cInt (const void * _class, int i, void * _self, void * _v, void * t, const void * o, va_list * app) {
+	const struct TBaseClass * superclass = cast(TBaseClass(), super(_class));
+
+	cast(TBase(), t);
+	cast(Object(), o);
+
+	assert(superclass -> cInt.method);
+	return ((const int (*) ()) superclass -> cInt.method)(i, _self, _v, t, o, app);
+}
+
+void cVoid (const void * _self) {
+	const struct TBaseClass * class = cast(Class(), _self);
+
+	if (isOf(class, TBaseClass()) && class -> cVoid.method) {
+
+		((void (*) ()) class -> cVoid.method)(_self);
+	} else
+		forward(_self, 0, (Method) cVoid, "cVoid", _self);
+}
+
+void super_cVoid (const void * _class, const void * _self) {
+	const struct TBaseClass * superclass = cast(TBaseClass(), super(_class));
+
+	assert(superclass -> cVoid.method);
+	((void (*) ()) superclass -> cVoid.method)(_self);
+}
+
+static void * TBaseClass_ctor (void * _self, va_list * app) {
+	struct TBaseClass * self = super_ctor(TBaseClass(), _self, app);
+	Method selector;
+#ifdef va_copy
+	va_list ap; va_copy(ap, * app);
+#else
+	va_list ap = * app;
+#endif
+
+	while ((selector = va_arg(ap, Method)))
+	{	const char * tag = va_arg(ap, const char *);
+		Method method = va_arg(ap, Method);
+
+		if (selector == (Method) dVoid)
+		{	if (tag)
+				self -> dVoid.tag = tag,
+				self -> dVoid.selector = selector;
+			self -> dVoid.method = method;
+			continue;
+		}
+		if (selector == (Method) dTBase)
+		{	if (tag)
+				self -> dTBase.tag = tag,
+				self -> dTBase.selector = selector;
+			self -> dTBase.method = method;
+			continue;
+		}
+		if (selector == (Method) cInt)
+		{	if (tag)
+				self -> cInt.tag = tag,
+				self -> cInt.selector = selector;
+			self -> cInt.method = method;
+			continue;
+		}
+		if (selector == (Method) cVoid)
+		{	if (tag)
+				self -> cVoid.tag = tag,
+				self -> cVoid.selector = selector;
+			self -> cVoid.method = method;
+			continue;
+		}
+	}
+#ifdef va_copy
+	va_end(ap);
+#endif
+	return self;
+}
+
+static const void * _TBaseClass;
+
+const void * TBaseClass (void) {
+	return _TBaseClass ? _TBaseClass :
+		(_TBaseClass = new(Class(),
+			"TBaseClass", Class(), sizeof(struct TBaseClass),
+			ctor, "", TBaseClass_ctor,
+			(void *) 0));
+}
+
+static const void * _TBase;
+
+const void * TBase (void) {
+	return _TBase ? _TBase :
+		(_TBase = new(TBaseClass(),
+			"TBase", T(), sizeof(struct TBase),
+			cInt, "", TBase_cInt,
+			cVoid, "", TBase_cVoid,
+			dVoid, "dVoid", TBase_dVoid,
+			dTBase, "dTBase", TBase_dTBase,
+			(void *) 0));
+}
+line -2
+line -1

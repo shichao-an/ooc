@@ -1,0 +1,158 @@
+.\"	Class.3 -- 1.3 Sep 26 17:55:08 1993
+.\"	Copyright (c) 1993 Axel T. Schreiner
+.TH Class 3 "local: ats"
+.SH NAME
+\f3Class  Class: Object\fP \- root metaclass
+.SH SYNOPSIS
+.nf
+Object
+    \f3Class\fP
+.sp .5
+\f3new(Class(), \f2name\f3, \f2superclass\f3, \f2size\f3, \c
+\f2selector\f3, \f2tag\f3, \f2method\f3, \f2... \f3, 0);\f1 
+.sp .5
+.BI "Object @ allocate (const " self )
+.BI "const Class @ super (const " self )
+.BI "const char * nameOf (const " self )
+.fi
+.SH DESCRIPTION
+A metaclass object describes a class,
+i.e.,
+it contains the class
+.IR name ,
+a pointer to the class'
+.I super
+class description,
+the
+.I size
+of an object in the class,
+and information about all dynamically linked methods
+which can be applied to objects of the class.
+This information consists of a pointer to the
+.I selector
+function,
+a
+.I tag
+string for the
+.B respondsTo
+method
+(which may be empty),
+and a pointer to the actual
+.I method
+function for objects of the class.
+.PP
+A metaclass is a collection of metaclass objects
+which all contain the same variety of method informations,
+where, of course, each metaclass object may point to
+different methods.
+A metaclass description describes a metaclass.
+.PP
+.B Class
+is the root metaclass.
+There is a metaclass object
+.B Class
+which describes the metaclass
+.BR Class .
+Every other metaclass
+.I X
+is described by some other metaclass object
+.I X
+which is a member of
+.BR Class .
+.PP
+The metaclass
+.B Class
+contains a metaclass object
+.B Object
+which describes the root class
+.BR Object .
+A new class
+.IR Y ,
+which has the same dynamically bound methods as the class
+.BR Object ,
+is described by a metaclass object
+.IR Y ,
+which is a member of
+.BR Class .
+.PP
+A new class
+.IR Z ,
+which has more dynamically bound methods than
+.BR Object ,
+requires a metaclass object
+.IR Z ,
+which is a member of a new metaclass
+.IR M .
+This new metaclass has a metaclass description
+.IR M ,
+which is a member of
+.BR Class .
+.PP
+The
+.B Class
+constructor is used to build new class description objects like
+.I Y
+and metaclass description objects like
+.IR M .
+The
+.I M
+constructor is used to build new class description objects like
+.IR Z .
+The
+.I Y
+constructor builds objects which are members of class
+.IR Y ,
+and the
+.I Z
+constructor builds objects in class
+.IR Z .
+.PP
+.B allocate
+reserves memory for an object of its argument class
+and installs this class as the class description pointer.
+Unless overwritten,
+.B new
+calls
+.B allocate
+and applies
+.B ctor
+to the result.
+.B retrieve
+calls
+.B allocate
+and applies
+.B geto
+to the result.
+.PP
+.B super
+returns the superclass from a class description.
+.PP
+.B nameOf
+returns the name from a class description.
+.PP
+The
+.B Class
+constructor
+.B ctor
+handles method inheritance.
+Only information about overwritten methods needs to be passed to
+.BR new .
+The information consists of the address of the selector
+to locate the method,
+a tag string which may be empty,
+and the address of the new method.
+The method information tuples may appear in any order of methods;
+zero in place of a
+.I selector
+terminates the list.
+.PP
+.BR delete ,
+.BR dtor ,
+and
+.B geto
+are inoperative for class descriptions.
+.PP
+Class descriptions are only accessed by means of functions
+which initialize the description during the first call.
+.SH SEE ALSO
+ooc(1), retrieve(2)

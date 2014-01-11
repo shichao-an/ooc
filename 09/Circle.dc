@@ -1,0 +1,14 @@
+% Circle ctor {
+	struct Circle * self = super_ctor(Circle(), _self, app);
+
+	self -> rad = va_arg(* app, int);
+	return self;
+}
+
+% Circle draw {
+%casts
+	printf("circle at %d,%d rad %d\n",
+			x(self), y(self), self -> rad);
+}
+
+%init

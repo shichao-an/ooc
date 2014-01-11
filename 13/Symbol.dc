@@ -1,0 +1,161 @@
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "parse.h"		// error()
+#include "Node.h"
+
+% Symbol ctor {
+	struct Symbol * self = super_ctor(Symbol(), _self, app);
+
+	self -> name = va_arg(* app, const char *);
+	self -> lex = va_arg(* app, int);
+	return self;
+}
+
+% Symbol puto {
+	int result;
+%casts
+	result = super_puto(Symbol(), _self, fp);
+	return result + fprintf(fp, "\tname %s\n\tlex %d\n",
+							self -> name, self -> lex);
+}
+
+% Symbol geto {
+	struct Symbol * self = super_geto(Symbol(), _self, fp);
+	char buf [BUFSIZ];
+
+	if (fscanf(fp, "\tname %s\n\tlex %d\n",
+							buf, & self -> lex) != 2)
+		assert(0);
+	self -> name = malloc(strlen(buf) + 1);
+	assert(self -> name);
+	strcpy((char *) self -> name, buf);
+	return self;
+}
+
+% Symbol name {
+%casts
+	return self -> name;
+}
+
+% Symbol lex {
+%casts
+	return self -> lex;
+}
+
+% : Reserved delete {		// don't respondTo delete
+}
+
+% Var puto {
+	int result;
+%casts
+	result = super_puto(Var(), _self, fp);
+	return result + fprintf(fp, "\tvalue %g\n", self -> value);
+}
+
+% Var geto {
+	struct Var * self = super_geto(Var(), _self, fp);
+
+	if (fscanf(fp, "\tvalue %lg\n", & self -> value) != 1)
+		assert(0);
+	return self;
+}
+
+% Var move {
+%casts
+	setvalue(self, from -> value);
+}
+
+% Var value {
+%casts
+	return self -> value;
+}
+
+% Var setvalue {
+%casts
+	return self -> value = value;
+}
+
+% Const ctor {
+	struct Const * self = super_ctor(Const(), _self, app);
+
+	setvalue(self, va_arg(* app, double));
+	return self;
+}
+
+% : Const delete {		// don't respondTo delete
+}
+
+% : Const move {		// don't respondTo move
+}
+
+% Fun puto {
+	int result;
+%casts
+	result = super_puto(Fun(), _self, fp);
+	if (self -> fun)
+	{	result += fputs("=\n", fp);
+		return result + puto(self -> fun, fp);
+	}
+	return result + fputs(".\n", fp);
+}
+
+% Fun geto {
+	struct Fun * self = super_geto(Fun(), _self, fp);
+	int ch = getc(fp);
+
+	if (getc(fp) != '\n')
+		assert(0);
+	switch (ch) {
+	case '=':
+		cast(Node(), self -> fun = retrieve(fp));
+	case '.':
+		break;
+	default:
+		assert(0);
+	}
+	return self;
+}
+
+% Fun move {
+%casts
+	setfun(self, from -> fun), from -> fun = 0;
+}
+
+% Fun setfun {
+%casts
+	if (self -> fun)
+		delete(self -> fun);
+	self -> fun = fun;
+}
+
+% Fun funvalue {
+%casts
+	if (! self -> fun)
+		error("undefined function");
+	setvalue(self, value);	// argument for parameter
+	return exec(self -> fun);
+}
+
+% Math ctor {
+	struct Math * self = super_ctor(Math(), _self, app);
+
+	self -> fun = va_arg(* app, function);
+	return self;
+}
+
+% : Math delete {		// don't respondTo delete
+}
+
+% Math mathvalue {
+	double result;
+%casts
+	errno = 0;
+	result = self -> fun(value);
+	if (errno)
+		error("error in %s: %s", name(self), strerror(errno));
+	return result;
+}
+
+%init

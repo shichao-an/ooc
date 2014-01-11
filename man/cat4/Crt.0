@@ -1,0 +1,66 @@
+
+
+
+Crt(4)                                                     Crt(4)
+
+
+NAME
+       IcClass  Crt: Ic -- input/output objects for curses
+
+SYNOPSIS
+       Objct
+           Ic
+               Crt
+                   CButton
+                   CLineout
+       new(Crt());
+       new(CButton(), "text", y, x);
+       new(CLineOut(), y, x, len);
+       void makeWindow (self, int rows, int cols, int x, int y)
+       void addStr (self, int y, int x, const char * s)
+       void crtBox (self)
+
+DESCRIPTION
+       A Crt object wraps a curses(3) window.  curses is initial-
+       ized when the first Crt object is created.
+
+       Crt_gate() is the event loop: it monitors the keyboard; it
+       implements  a  vi-style cursor move for the keys hjkl, and
+       possibly, for the arrow keys; if  return  is  pressed,  it
+       sends an Event object with kind 1 and an array with column
+       and row position; if control-D is  pressed,  gate  returns
+       reject; any other key is sent on as an Event object with a
+       string containing the key character.
+
+       A CLineOut object implements a LineOut object on a  curses
+       screen.  Incoming strings should not exceed len bytes.
+
+       A  CButton  object  implements a Button object on a curses
+       screen.  If it receives a  matching  text,  it  sends  it.
+       Additionally,  if it receives a position event, e.g., from
+       a Crt object, and if the coordinates are within  its  win-
+       dow, it sends its text on.
+
+SEE ALSO
+       Event(4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            local: ats                          1
+
+
